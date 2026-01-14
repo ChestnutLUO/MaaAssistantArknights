@@ -1,6 +1,6 @@
 // <copyright file="GameSettingsUserControlModel.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -15,12 +15,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using MaaWpfGui.Constants;
 using MaaWpfGui.Helper;
 using MaaWpfGui.States;
 using MaaWpfGui.Utilities;
 using MaaWpfGui.Utilities.ValueType;
 using MaaWpfGui.ViewModels.UI;
+using MaaWpfGui.ViewModels.UserControl.TaskQueue;
 using Serilog;
 using Stylet;
 
@@ -41,12 +44,22 @@ public class GameSettingsUserControlModel : PropertyChangedBase
 
     private static VersionUpdateSettingsUserControlModel VersionUpdateSettings => SettingsViewModel.VersionUpdateSettings;
 
+    private bool _startGame = Convert.ToBoolean(ConfigurationHelper.GetValue(ConfigurationKeys.StartGame, bool.TrueString));
+
+    public bool StartGame
+    {
+        get => _startGame;
+        set {
+            SetAndNotify(ref _startGame, value);
+            ConfigurationHelper.SetValue(ConfigurationKeys.StartGame, value.ToString());
+        }
+    }
+
     /// <summary>
     /// Gets the list of the client types.
     /// </summary>
     public List<CombinedData> ClientTypeList { get; } =
         [
-            new() { Display = LocalizationHelper.GetString("NotSelected"), Value = string.Empty },
             new() { Display = LocalizationHelper.GetString("Official"), Value = "Official" },
             new() { Display = LocalizationHelper.GetString("Bilibili"), Value = "Bilibili" },
             new() { Display = LocalizationHelper.GetString("YoStarEN"), Value = "YoStarEN" },
@@ -55,24 +68,58 @@ public class GameSettingsUserControlModel : PropertyChangedBase
             new() { Display = LocalizationHelper.GetString("Txwy"), Value = "txwy" },
         ];
 
-    private string _clientType = ConfigurationHelper.GetValue(ConfigurationKeys.ClientType, string.Empty);
+    private string _clientType = ConfigurationHelper.GetValue(ConfigurationKeys.ClientType, "Official");
 
     /// <summary>
     /// Gets or sets the client type.
     /// </summary>
     public string ClientType
     {
-        get => _clientType;
-        set
-        {
-            SetAndNotify(ref _clientType, value);
+        get { // v5.19.0-beta.1
+            if (!string.IsNullOrEmpty(_clientType))
+            {
+                return _clientType;
+            }
+
+            ConfigurationHelper.SetValue(ConfigurationKeys.ClientType, "Official");
+            return "Official";
+        }
+
+        set {
+            var oldValue = _clientType;
+            if (!SetAndNotify(ref _clientType, value))
+            {
+                return;
+            }
+
             ConfigurationHelper.SetValue(ConfigurationKeys.ClientType, value);
             VersionUpdateSettings.ResourceInfoUpdate();
-            Instances.TaskQueueViewModel.UpdateStageList();
+            FightSettingsUserControlModel.Instance.UpdateStageList();
             Instances.TaskQueueViewModel.UpdateDatePrompt();
-            Instances.AsstProxy.LoadResource();
-            SettingsViewModel.AskRestartToApplySettings(_clientType is "YoStarEN");
+
+            if (!NeedRestartAfterClientTypeChange(oldValue, value))
+            {
+                return;
+            }
+
+            Task.Run(() => {
+                Instances.AsstProxy.LoadResource();
+            });
+
+            SettingsViewModel.AskRestartToApplySettings(value is "YoStarEN");
         }
+    }
+
+    private static bool NeedRestartAfterClientTypeChange(string oldType, string newType)
+    {
+        if (string.IsNullOrEmpty(oldType) || oldType == newType)
+        {
+            return false;
+        }
+
+        // 官服 <-> B服 之间切换不需要重启
+        return (oldType != "Official" || newType != "Bilibili") &&
+               (oldType != "Bilibili" || newType != "Official");
     }
 
     private bool _deploymentWithPause = Convert.ToBoolean(ConfigurationHelper.GetValue(ConfigurationKeys.RoguelikeDeploymentWithPause, bool.FalseString));
@@ -80,38 +127,10 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool DeploymentWithPause
     {
         get => _deploymentWithPause;
-        set
-        {
+        set {
             SetAndNotify(ref _deploymentWithPause, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.RoguelikeDeploymentWithPause, value.ToString());
             SettingsViewModel.ConnectSettings.UpdateInstanceSettings();
-        }
-    }
-
-    private bool _autoRestartOnDrop = Convert.ToBoolean(ConfigurationHelper.GetValue(ConfigurationKeys.AutoRestartOnDrop, bool.TrueString));
-
-    public bool AutoRestartOnDrop
-    {
-        get => _autoRestartOnDrop;
-        set
-        {
-            SetAndNotify(ref _autoRestartOnDrop, value);
-            ConfigurationHelper.SetValue(ConfigurationKeys.AutoRestartOnDrop, value.ToString());
-        }
-    }
-
-    private bool _roguelikeDelayAbortUntilCombatComplete = Convert.ToBoolean(ConfigurationHelper.GetValue(ConfigurationKeys.RoguelikeDelayAbortUntilCombatComplete, bool.FalseString));
-
-    /// <summary>
-    /// Gets or sets a value indicating whether delay abort until battle complete
-    /// </summary>
-    public bool RoguelikeDelayAbortUntilCombatComplete
-    {
-        get => _roguelikeDelayAbortUntilCombatComplete;
-        set
-        {
-            SetAndNotify(ref _roguelikeDelayAbortUntilCombatComplete, value);
-            ConfigurationHelper.SetValue(ConfigurationKeys.RoguelikeDelayAbortUntilCombatComplete, value.ToString());
         }
     }
 
@@ -120,8 +139,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public string StartsWithScript
     {
         get => _startsWithScript;
-        set
-        {
+        set {
             SetAndNotify(ref _startsWithScript, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.StartsWithScript, value);
         }
@@ -132,8 +150,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public string EndsWithScript
     {
         get => _endsWithScript;
-        set
-        {
+        set {
             SetAndNotify(ref _endsWithScript, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.EndsWithScript, value);
         }
@@ -144,8 +161,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool CopilotWithScript
     {
         get => _copilotWithScript;
-        set
-        {
+        set {
             SetAndNotify(ref _copilotWithScript, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.CopilotWithScript, value.ToString());
         }
@@ -156,8 +172,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool ManualStopWithScript
     {
         get => _manualStopWithScript;
-        set
-        {
+        set {
             SetAndNotify(ref _manualStopWithScript, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.ManualStopWithScript, value.ToString());
         }
@@ -165,8 +180,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
 
     public void RunScript(string str, bool showLog = true)
     {
-        bool enable = str switch
-        {
+        bool enable = str switch {
             "StartsWithScript" => !string.IsNullOrWhiteSpace(StartsWithScript),
             "EndsWithScript" => !string.IsNullOrWhiteSpace(EndsWithScript),
             _ => false,
@@ -177,8 +191,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
             return;
         }
 
-        Func<bool> func = str switch
-        {
+        Func<bool> func = str switch {
             "StartsWithScript" => () => ExecuteScript(StartsWithScript),
             "EndsWithScript" => () => ExecuteScript(EndsWithScript),
             _ => () => false,
@@ -209,10 +222,14 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     {
         try
         {
+            scriptPath = scriptPath.Trim();
+
             if (string.IsNullOrWhiteSpace(scriptPath))
             {
                 return false;
             }
+
+            scriptPath = Regex.Replace(scriptPath, @"\p{C}", string.Empty);
 
             string fileName;
             string arguments;
@@ -242,10 +259,8 @@ public class GameSettingsUserControlModel : PropertyChangedBase
                 arguments = arguments.Replace("-minimized", string.Empty).Trim();
             }
 
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
+            var process = new Process {
+                StartInfo = new ProcessStartInfo {
                     FileName = fileName,
                     Arguments = arguments,
                     WindowStyle = minimized ? ProcessWindowStyle.Minimized : ProcessWindowStyle.Normal,
@@ -268,8 +283,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool BlockSleep
     {
         get => _blockSleep;
-        set
-        {
+        set {
             SetAndNotify(ref _blockSleep, value);
             SleepManagement.SetBlockSleep(value);
             ConfigurationHelper.SetValue(ConfigurationKeys.BlockSleep, value.ToString());
@@ -281,8 +295,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool BlockSleepWithScreenOn
     {
         get => _blockSleepWithScreenOn;
-        set
-        {
+        set {
             SetAndNotify(ref _blockSleepWithScreenOn, value);
             SleepManagement.SetBlockSleepWithScreenOn(value);
             ConfigurationHelper.SetValue(ConfigurationKeys.BlockSleepWithScreenOn, value.ToString());
@@ -299,8 +312,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public string PenguinId
     {
         get => _penguinId;
-        set
-        {
+        set {
             SetAndNotify(ref _penguinId, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.PenguinId, value);
         }
@@ -314,8 +326,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool EnablePenguin
     {
         get => _enablePenguin;
-        set
-        {
+        set {
             SetAndNotify(ref _enablePenguin, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.EnablePenguin, value.ToString());
         }
@@ -329,8 +340,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public bool EnableYituliu
     {
         get => _enableYituliu;
-        set
-        {
+        set {
             SetAndNotify(ref _enableYituliu, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.EnableYituliu, value.ToString());
         }
@@ -345,8 +355,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public int TaskTimeoutMinutes
     {
         get => _taskTimeoutMinutes;
-        set
-        {
+        set {
             SetAndNotify(ref _taskTimeoutMinutes, value);
             _runningState.TaskTimeoutMinutes = value;
             ConfigurationHelper.SetValue(ConfigurationKeys.TaskTimeoutMinutes, value.ToString());
@@ -358,8 +367,7 @@ public class GameSettingsUserControlModel : PropertyChangedBase
     public int ReminderIntervalMinutes
     {
         get => _reminderIntervalMinutes;
-        set
-        {
+        set {
             SetAndNotify(ref _reminderIntervalMinutes, value);
             _runningState.ReminderIntervalMinutes = value;
             ConfigurationHelper.SetValue(ConfigurationKeys.ReminderIntervalMinutes, value.ToString());

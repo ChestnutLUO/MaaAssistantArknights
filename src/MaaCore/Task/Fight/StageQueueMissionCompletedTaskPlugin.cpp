@@ -3,8 +3,8 @@
 #include "Config/Miscellaneous/ItemConfig.h"
 #include "Config/TaskData.h"
 #include "Controller/Controller.h"
+#include "MaaUtils/ImageIo.h"
 #include "StageDropsTaskPlugin.h"
-#include "Utils/ImageIo.hpp"
 #include "Utils/Logger.hpp"
 #include "Vision/Matcher.h"
 #include "Vision/Miscellaneous/StageDropsImageAnalyzer.h"
@@ -57,7 +57,9 @@ void asst::StageQueueMissionCompletedTaskPlugin::mission_completed()
     auto&& [code, difficulty] = analyzer.get_stage_key();
 
     std::string stage_code = std::move(code);
-    ranges::transform(stage_code, stage_code.begin(), [](char ch) -> char { return static_cast<char>(::toupper(ch)); });
+    std::ranges::transform(stage_code, stage_code.begin(), [](char ch) -> char {
+        return static_cast<char>(::toupper(ch));
+    });
 
     Log.info(__FUNCTION__, "Stage Code:", stage_code, "Stars:", analyzer.get_stars());
 
@@ -191,7 +193,7 @@ void asst::StageQueueMissionCompletedTaskPlugin::upload_to_penguin(std::string s
             callback(AsstMsg::SubTaskError, cb_info);
             return;
         }
-        if (ranges::find(filter, drop_type) == filter.cend()) {
+        if (std::ranges::find(filter, drop_type) == filter.cend()) {
             continue;
         }
         if (drop.at("itemId").as_string().empty()) {
@@ -204,24 +206,24 @@ void asst::StageQueueMissionCompletedTaskPlugin::upload_to_penguin(std::string s
         all_drops.emplace(std::move(format_drop));
     }
     body["source"] = UploadDataSource;
-    body["version"] = Version;
+    body["version"] = MAA_VERSION;
 
     std::unordered_map<std::string, std::string> extra_headers;
     if (!m_penguin_id.empty()) {
         extra_headers.insert({ "authorization", "PenguinID " + m_penguin_id });
     }
 
-    std::string version = Version;
-    if (version.find("DEBUG VERSION") != std::string::npos) {
+    std::string version = MAA_VERSION;
+    if (version.find("DEBUG_VERSION") != std::string::npos) {
         version = "dev";
     }
     else if (!version.empty() && version[0] == 'v') {
         version.erase(0, 1);
     }
 
-    version.erase(ranges::remove(version, ' ').begin(), version.end());
+    version.erase(std::ranges::remove(version, ' ').begin(), version.end());
 
-    extra_headers.insert({ "User-Agent", std::string("MaaAssistantArknights/") + version + " cpr/" + CPR_VERSION });
+    extra_headers.insert({ "User-Agent", std::string("MaaAssistantArknights/") + version });
 
     if (!m_report_penguin_task_ptr) {
         m_report_penguin_task_ptr = std::make_shared<ReportDataTask>(report_penguin_callback, this);
@@ -244,11 +246,6 @@ void asst::StageQueueMissionCompletedTaskPlugin::report_penguin_callback(
     auto p_this = dynamic_cast<StageQueueMissionCompletedTaskPlugin*>(task_ptr);
     if (!p_this) {
         return;
-    }
-
-    if (msg == AsstMsg::SubTaskExtraInfo && detail.get("what", std::string()) == "PenguinId") {
-        std::string id = detail.get("details", "id", std::string());
-        p_this->m_penguin_id = id;
     }
 
     p_this->callback(msg, detail);

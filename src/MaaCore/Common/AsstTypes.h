@@ -3,7 +3,10 @@
 #include <array>
 #include <climits>
 #include <cmath>
+#include <concepts>
+#include <format>
 #include <functional>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -12,6 +15,7 @@
 #include <vector>
 
 #include "Utils/StringMisc.hpp"
+#include "meojson/json.hpp"
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -214,6 +218,37 @@ struct Rect
 
     Rect move(Rect move) const { return { x + move.x, y + move.y, move.width, move.height }; }
 
+    // 创建一个包含所有传入Rect的最小包围盒
+    static Rect bounding_box(const std::vector<Rect>& rects)
+    {
+        if (rects.empty()) {
+            return {};
+        }
+
+        int min_x = INT_MAX;
+        int min_y = INT_MAX;
+        int max_x = INT_MIN;
+        int max_y = INT_MIN;
+
+        for (const auto& rect : rects) {
+            min_x = std::min<int>(min_x, rect.x);
+            min_y = std::min<int>(min_y, rect.y);
+            max_x = std::max<int>(max_x, rect.x + rect.width);
+            max_y = std::max<int>(max_y, rect.y + rect.height);
+        }
+
+        return { min_x, min_y, max_x - min_x, max_y - min_y };
+    }
+
+    // 创建一个包含所有传入Rect的最小包围盒
+    template <typename... Args>
+    requires(std::same_as<std::remove_cvref_t<Args>, Rect> && ...)
+    static Rect bounding_box(const Rect& first, const Args&... args)
+    {
+        std::vector<Rect> rects = { first, args... };
+        return bounding_box(rects);
+    }
+
     int x = 0;
     int y = 0;
     int width = 0;
@@ -226,29 +261,94 @@ inline constexpr To make_rect(const From& rect)
     return To { rect.x, rect.y, rect.width, rect.height };
 }
 
-struct TextRect
+struct AnalyzerResult
 {
-    std::string to_string() const
-    {
-        return "{ " + text + ": " + rect.to_string() + ", score: " + std::to_string(score) + " }";
-    }
+    virtual ~AnalyzerResult() = default;
+
+    virtual std::string to_string() const { return {}; };
 
     explicit operator std::string() const { return to_string(); }
+
+    virtual json::object to_json() const { return {}; };
+
+    explicit operator json::object() const { return to_json(); }
+};
+
+struct TextRect : public AnalyzerResult
+{
+    TextRect() = default;
+
+    TextRect(Rect r, double s, std::string t) :
+        rect(r),
+        score(s),
+        text(std::move(t))
+    {
+    }
+
+    std::string to_string() const override
+    {
+        return std::format("{{ text: {}, rect: {}, score: {:.6f} }}", text, rect.to_string(), score);
+    }
+
+    json::object to_json() const override
+    {
+        return { { "rect", json::array { rect.x, rect.y, rect.width, rect.height } },
+                 { "score", score },
+                 { "text", text } };
+    }
 
     Rect rect;
     double score = 0.0;
     std::string text;
 };
 
-struct MatchRect
+struct MatchRect : public AnalyzerResult
 {
-    std::string to_string() const { return "{ rect: " + rect.to_string() + ", score: " + std::to_string(score) + " }"; }
+    MatchRect() = default;
 
-    explicit operator std::string() const { return to_string(); }
+    MatchRect(Rect r, double s, std::string t) :
+        rect(r),
+        score(s),
+        templ_name(std::move(t))
+    {
+    }
+
+    std::string to_string() const override
+    {
+        return std::format("{{ template: {}, rect: {}, score: {:.6f} }}", templ_name, rect.to_string(), score);
+    }
+
+    json::object to_json() const override
+    {
+        return { { "rect", json::array { rect.x, rect.y, rect.width, rect.height } },
+                 { "score", score },
+                 { "template", templ_name } };
+    }
 
     Rect rect;
     double score = 0.0;
     std::string templ_name;
+};
+
+struct FeatureMatchRect : public AnalyzerResult
+{
+    FeatureMatchRect() = default;
+
+    FeatureMatchRect(Rect r, int c) :
+        rect(r),
+        count(c)
+    {
+    }
+
+    std::string to_string() const override { return std::format("{{ rect: {}, count: {} }}", rect.to_string(), count); }
+
+    json::object to_json() const override
+    {
+        return { { "rect", json::array { rect.x, rect.y, rect.width, rect.height } }, { "count", count } };
+    }
+
+    Rect rect;
+    int count = 0;
 };
 } // namespace asst
 
@@ -317,6 +417,7 @@ enum class AlgorithmType
     JustReturn,
     MatchTemplate,
     OcrDetect,
+    FeatureMatch,
 };
 
 inline AlgorithmType get_algorithm_type(std::string algorithm_str)
@@ -326,6 +427,7 @@ inline AlgorithmType get_algorithm_type(std::string algorithm_str)
         { "matchtemplate", AlgorithmType::MatchTemplate },
         { "justreturn", AlgorithmType::JustReturn },
         { "ocrdetect", AlgorithmType::OcrDetect },
+        { "featurematch", AlgorithmType::FeatureMatch },
     };
     if (algorithm_map.contains(algorithm_str)) {
         return algorithm_map.at(algorithm_str);
@@ -340,6 +442,7 @@ inline std::string enum_to_string(AlgorithmType algo)
         { AlgorithmType::JustReturn, "JustReturn" },
         { AlgorithmType::MatchTemplate, "MatchTemplate" },
         { AlgorithmType::OcrDetect, "OcrDetect" },
+        { AlgorithmType::FeatureMatch, "FeatureMatch" },
     };
     if (auto it = algorithm_map.find(algo); it != algorithm_map.end()) {
         return it->second;
@@ -447,6 +550,29 @@ inline std::string enum_to_string(MatchMethod method)
     }
     return "Invalid";
 }
+
+enum class FeatureDetector
+{
+    SIFT,  // 计算复杂度高，具有尺度不变性、旋转不变性。效果最好。
+    SURF,
+    ORB,   // 计算速度非常快，具有旋转不变性。但不具有尺度不变性。
+    BRISK, // 计算速度非常快，具有尺度不变性、旋转不变性。
+    KAZE,  // 适用于2D和3D图像，具有尺度不变性、旋转不变性。
+    AKAZE, // 计算速度较快，具有尺度不变性、旋转不变性。
+};
+
+inline std::optional<FeatureDetector> get_feature_detector(std::string method_str)
+{
+    utils::touppers(method_str);
+    static const std::unordered_map<std::string, FeatureDetector> method_map = {
+        { "SIFT", FeatureDetector::SIFT },   { "SURF", FeatureDetector::SURF }, { "ORB", FeatureDetector::ORB },
+        { "BRISK", FeatureDetector::BRISK }, { "KAZE", FeatureDetector::KAZE }, { "AKAZE", FeatureDetector::AKAZE },
+    };
+    if (auto it = method_map.find(method_str); it != method_map.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
 } // namespace asst
 
 namespace asst
@@ -467,7 +593,7 @@ struct TaskPipelineInfo
     TaskList sub;                // 子任务（列表）
     TaskList on_error_next;      // 任务出错之后要去执行什么
     TaskList exceeded_next;      // 达到最多次数了之后，下一个可能的任务（列表）
-    TaskList reduce_other_times; // 执行了该任务后，需要减少别的任务的执行次数。例如执行了吃理智药，
+    TaskList reduce_other_times; // 执行了该任务后，需要减少别的任务的执行次数。例如执行了药剂恢复，
                                  // 则说明上一次点击蓝色开始行动按钮没生效，所以蓝色开始行动要-1
 };
 
@@ -505,15 +631,16 @@ struct TaskInfo : public TaskPipelineInfo
     bool sub_error_ignored = false;                        // 子任务如果失败了，是否继续执行剩下的任务
     int max_times = INT_MAX;                               // 任务最多执行多少次
     Rect specific_rect;                                    // 指定区域，目前仅针对ClickRect任务有用，会点这个区域
-    int pre_delay = 0;                                     // 执行该任务前的延时
-    int post_delay = 0;                                    // 执行该任务后的延时
-    int retry_times = INT_MAX;                             // 未找到图像时的重试次数
-    Rect roi;                                              // 要识别的区域，若为0则全图识别
-    Rect rect_move;                                        // 识别结果移动：有些结果识别到的，和要点击的不是同一个位置。
-                                                           // 即识别到了res，点击res + result_move的位置
-    bool cache = false;                                    // 是否使用缓存区域
-    std::vector<int> special_params;                       // 某些任务会用到的特殊参数
-    std::string input_text; // 输入任务的文字，目前希望仅针对 Input 任务有效， algorithm 为 JustReturn
+    bool high_resolution_swipe_fix = false; // 是否启用高分辨率滑动修正，仅对 ProcessTask 生效（其实只有关卡的滑动用上了
+    int pre_delay = 0;                      // 执行该任务前的延时
+    int post_delay = 0;                     // 执行该任务后的延时
+    int retry_times = INT_MAX;              // 未找到图像时的重试次数
+    Rect roi;                               // 要识别的区域，若为0则全图识别
+    Rect rect_move;                         // 识别结果移动：有些结果识别到的，和要点击的不是同一个位置。
+                                            // 即识别到了res，点击res + result_move的位置
+    bool cache = false;                     // 是否使用缓存区域
+    std::vector<int> special_params;        // 某些任务会用到的特殊参数
+    std::string input_text;                 // 输入任务的文字，目前希望仅针对 Input 任务有效， algorithm 为 JustReturn
 };
 
 using TaskPtr = std::shared_ptr<TaskInfo>;
@@ -528,13 +655,15 @@ struct OcrTaskInfo : public TaskInfo
     constexpr OcrTaskInfo(OcrTaskInfo&&) noexcept = default;
     constexpr OcrTaskInfo& operator=(const OcrTaskInfo&) = default;
     constexpr OcrTaskInfo& operator=(OcrTaskInfo&&) noexcept = default;
-    std::vector<std::string> text; // 文字的容器，匹配到这里面任一个，就算匹配上了
-    bool full_match = false;       // 是否需要全匹配，否则搜索到子串就算匹配上了
-    bool is_ascii = false;         // 是否启用字符数字模型
-    bool without_det = false;      // 是否不使用检测模型
-    bool replace_full = false;     // 匹配之后，是否将整个字符串replace（false是只替换match的部分）
+    std::vector<std::string> text;                   // 文字的容器，匹配到这里面任一个，就算匹配上了
+    bool full_match = false;                         // 是否需要全匹配，否则搜索到子串就算匹配上了
+    bool is_ascii = false;                           // 是否启用字符数字模型
+    bool without_det = false;                        // 是否不使用检测模型
+    bool replace_full = false;                       // 匹配之后，是否将整个字符串replace（false是只替换match的部分）
+    bool use_raw = true;                             // 是否使用原始图片进行识别，false则使用灰度图
     std::vector<std::pair<std::string, std::string>>
-        replace_map;               // 部分文字容易识别错，字符串强制replace之后，再进行匹配
+        replace_map;                                 // 部分文字容易识别错，字符串强制replace之后，再进行匹配
+    std::array<int, 2> bin_threshold = { 140, 255 }; // 二值化灰度上阈值
 };
 
 using OcrTaskPtr = std::shared_ptr<OcrTaskInfo>;
@@ -559,10 +688,28 @@ struct MatchTaskInfo : public TaskInfo
     Ranges mask_ranges;                   // 匹配掩码范围，TaskData 仅允许 array<int, 2>，但保留彩色掩码支持
     Ranges color_scales;                  // 数色掩码范围
     bool color_close = true;              // 数色时是否使用闭运算处理
+    bool pure_color = false;              // 数色时是否忽略模板匹配结果
 };
 
 using MatchTaskPtr = std::shared_ptr<MatchTaskInfo>;
 using MatchTaskConstPtr = std::shared_ptr<const MatchTaskInfo>;
+
+struct FeatureMatchTaskInfo : public TaskInfo
+{
+    constexpr FeatureMatchTaskInfo() = default;
+    constexpr virtual ~FeatureMatchTaskInfo() override = default;
+    constexpr FeatureMatchTaskInfo(const FeatureMatchTaskInfo&) = default;
+    constexpr FeatureMatchTaskInfo(FeatureMatchTaskInfo&&) noexcept = default;
+    constexpr FeatureMatchTaskInfo& operator=(const FeatureMatchTaskInfo&) = default;
+    constexpr FeatureMatchTaskInfo& operator=(FeatureMatchTaskInfo&&) noexcept = default;
+    std::string templ_names;                          // 匹配模板图片文件名
+    FeatureDetector detector = FeatureDetector::SIFT; // 特征检测器
+    int count = 4;                                    // 匹配特征点的阈值
+    double ratio = 0.6;                               // KNN 匹配算法的距离比值
+};
+
+using FeatureMatchTaskPtr = std::shared_ptr<FeatureMatchTaskInfo>;
+using FeatureMatchTaskConstPtr = std::shared_ptr<const FeatureMatchTaskInfo>;
 
 inline static const std::string UploadDataSource = "MaaAssistantArknights";
 } // namespace asst

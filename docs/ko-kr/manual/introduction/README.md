@@ -1,9 +1,9 @@
 ---
-title: 기능
+title: 기능 소개
 icon: mdi:information-outline
 index: false
 dir:
-  order: 2
+  order: 4
 ---
 
-<Catalog base='/ko-kr/manual/introduction/' />
+<Redirect to="startup" />

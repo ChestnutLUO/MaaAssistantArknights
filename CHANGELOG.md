@@ -1,108 +1,202 @@
-## v5.16.4
+## v6.2.1
 
-### 修复 | Fix
+### Highlights
 
-* 修复台服基建干员列表回正错误 (#12652) @status102
+随着米诺斯 SS 的到来，我们迎来了一位全新的萨尔贡六星干员，~~那么牛牛的米诺斯大C在哪呢？~~
 
-## v5.16.3
+#### 日志侧边栏重构
 
-在这个版本，我们优化了自适应调整连战次数功能，每次开始前均调整为可用的最大次数，避免了理智溢出的风险.
+本次更新我们对主页日志侧边栏进行了整体重构，统一并优化了布局与视觉样式。
 
-> 典型流程示例:  
-> 当前20理智, 上限150, 关卡消耗21理智 (6连战需126理智)  
-> 
-> 情况1: 有2瓶80理智药, 设置吃2瓶, 吃完两瓶理智药超出上限 (20 + 160 = 180) → 先吃一瓶 (20 + 80 = 100) 并调整次数为4连战 (4 × 21 = 84), 完成后再吃一瓶并消耗完剩下的理智  
-> 情况2: 有2瓶80理智药, 设置只吃1瓶吃1瓶 (+80) 达到吃药上限，关闭窗口触发调整 → 自动调整为4连战  
-> 情况3: 有1瓶80理智药, 自动吃掉1瓶 (+80) 无药可吃触发调整 → 自动调整为4连战
+现在你可以在「设置 → 界面设置」中控制【使用卡片样式日志】设置来切换日志样式，控制【日志缩略图最大数量】设置来决定日志侧边栏的缩略图数量上限（这些缩略图都是临时保存在内存里的，**内存较小的用户可能需要调整数量**）
 
-并且指定次数将联动连战次数
+#### 自动战斗优化
 
-> 示例: 假设当前 100 理智, 关卡消耗 6 理智  
-> 
-> 旧版本: 指定次数设为 3, 连战次数设为 5, 将作战 5 * 3 = 15 次, 消耗 15 x 6 = 90 理智  
-> 新版本: 指定次数设为 10, 连战次数设为 4, 将作战 4 * floor(10 / 4) = 8 次, 消耗 8 x 6 = 48 理智  
-> 新版本: 指定次数设为 10, 连战次数设为 AUTO, 将作战 6 * floor(10 / 6) + (10 % 6) = 10 次, 消耗 10 x 6 = 60 理智  
+我们优化了自动战斗功能的作业路径下拉选择栏，现在同一个任务的本地作业将会折叠在一起，大幅度提升了下拉选择栏的可读性。
 
-如果您遇到任何意外行为，请通过【设置】→【问题反馈】生成日志并提交给我们~
+另外，本次游戏更新 yj 修改了暂停按钮的位置，我们已经通过热更新修复该问题，本次更新 MAA 也会合并此项修复。
 
-----
+#### 今日关卡提示优化
 
-In this version, we've optimized the adaptive Serie count adjustment feature. Before each operation, the system will now automatically adjust to the maximum available Serie count, eliminating the risk of sanity overflow.
+今日关卡提示中的掉落信息现已支持同步显示对应的库存数量，便于在刷图规划时快速判断材料缺口与优先级。
 
-> Typical workflow examples:  
-> Current sanity: 20, Max sanity: 150, Stage cost: 21 sanity (6-Serie requires 126 sanity)  
-> 
-> Case 1: Having 2×80 sanity potions, set to consume 2 potions. Full consumption would exceed max sanity (20 + 160 = 180) → First consume one potion (20 + 80 = 100) and adjust to 4-Serie (4 × 21 = 84). After completion, consume the second potion and expend remaining sanity.  
-> Case 2: Having 2×80 sanity potions, set to consume only 1 potion (+80) reaches consumption limit. Closing window triggers adjustment → Automatically adjusts to 4-Serie.  
-> Case 3: Having 1×80 sanity potion, auto-consume 1 potion (+80). With no remaining potions, triggers adjustment → Automatically adjusts to 4-Serie.
+你可通过「小工具 → 仓库识别」更新库存数量，今日关卡提示中的掉落信息会自动同步更新。
 
-Additionally, specified operation count will now coordinate with Serie count:
+#### 基建与线索管理优化
 
-> Example: Current 100 sanity, stage cost 6 sanity  
-> 
-> Old version: Specified count set to 3, Serie count set to 5 → Would complete 5 * 3 = 15 operations, consuming 15 x 6 = 90 sanity.  
-> New version: Specified count set to 10, Serie count set to 4 → Will complete 4 * floor(10 / 4) = 8 operations, consuming 8 x 6 = 48 sanity.  
-> New version: Specified count set to 10, Serie count set to AUTO → Will complete 6 * floor(10 / 6) + (10 % 6) = 10 operations, consuming 10 x 6 = 60 sanity.  
+我们在「一键长草 → 基建换班 → 高级设置」里新增了【进行线索交流】【赠送线索】两项独立开关设置，提升基建管理的灵活性。
 
-If you encounter any unexpected behavior, please generate logs via [Settings] → [Issue Report] and submit them to us~
+我们也优化了一键赠送线索等的逻辑，减少误操作发生的可能性。
+
+同时，在基建进入设施失败时牛牛将自动保留测试截图，便于后续问题的定位与排查。
+
+#### 成就系统 DLC
+
+我们新增了一些成就，覆盖多个场景，等你探索哦~
 
 ----
 
-以下是详细内容： Changelog below:
+#### Log Sidebar Redesign
+
+In this update, we've completely redesigned the main page log sidebar, unifying and optimizing its layout and visual style.
+
+You can now switch log styles by controlling the *Use card style log* setting in *Settings → GUI*, and control the *Maximum number of log thumbnails* setting to determine the maximum number of thumbnails in the log sidebar (these thumbnails are temporarily stored in memory, **users with limited memory may need to adjust the number**).
+
+#### *Copilot* Optimization
+
+We've optimized the task path dropdown selection bar for the *Copilot*. Local tasks for the same stage will now be collapsed together, significantly improving the readability of the dropdown selection bar.
+
+Additionally, the game update changed the position of the pause button. We have fixed this issue through a hot update, and this fix has been merged into the MAA update.
+
+#### *Today's open stages* Hint Optimization
+
+The drop information in the *Today's open stages* hints now supports synchronous display of the corresponding depot quantity, making it easier to quickly determine material shortages and priorities when planning your stage runs.
+
+You can update your depot info through *Toolbox → Depot*, and the daily drop information in the *Today's open stages* hints will be automatically updated.
+
+#### *Base* and Clue Management Optimizations
+
+We've added two independent toggle settings for *Conduct Clue Exchange* and *Send Clues* in *Farming → Base → Advanced*, improving the flexibility of *Base* management.
+
+We've also optimized the logic for one-click clue sending, reducing the possibility of accidental operations.
+
+Additionally, when *Base* entry fails, MAA will automatically save a test screenshot for easier troubleshooting and identification of subsequent issues.
+
+#### Achievement System DLC
+
+We've added some achievements covering multiple scenarios, waiting for you to explore!
+
+----
+
+以下是详细内容：
+
+## v6.2.1
 
 ### 新增 | New
 
-* 添加萨卡兹肉鸽劳作的清晨关卡策略 (#12626) @1286587265 @Daydreamer114 @Saratoga-Official
-* 指定次数联动连战, 修复连战导致指定次数失效, Auto模式不再溢出理智 (#12592) @status102 @ABA2396 @Constrat
-* 添加 自定义 webhook 功能 (#12602) @KagurazakaIris @ABA2396
-* 肉鸽适配新干员 (#12599) @Saratoga-Official
-* Mac AUTO连续作战 @hguandl
-* 更新 333 搓玉一天三换排班表 (#12604) @E022-23093
-* 更新 243 极限效率一天四换排班表（20250507 修订） (#12598) @bodayw
+* 公告界面触屏滚动 @ABA2396
+* 拆分 debug 和 report 文件夹逻辑 @ABA2396
 
 ### 改进 | Improved
 
-* 日志压缩包压缩等级提升 (#12622) @BxFS
-* 基建使用切换职业栏返回列表最左侧 (#12594) @ABA2396
+* 自动检测地图是否为多阶段地图, 判断是否需要使用 view[0].x 修正镜头 (#15371) @status102
+* 优化下拉框逻辑 @ABA2396
+* 用妖法实现了自动战斗下拉框的失焦和收起按钮 @ABA2396
 
 ### 修复 | Fix
 
-* 切换账号失败 @Daydreamer114
-* 模拟器路径选择功能弹窗异常 @ABA2396
-* 截图增强显示错误 @ABA2396
-* 无法进入活动 @ABA2396
-* 刷理智结束后卡在“理智药选择”界面 @ABA2396
+* 游戏更新后结算黑屏时长大幅增加，导致肉鸽结算失败 @ABA2396
+* 增加理智战斗后点击到掉落列表的重试次数，避免延长的黑屏时间影响 @ABA2396
+* 将借助战打 OF-1 的任务结束后最大等待时间翻倍，避免延长的黑屏时间影响 @ABA2396
+* 肉鸽推荐设置文本 (#15370) @ABA2396 @Saratoga-Official
+* 自动战斗-悖论模拟 中文路径作业 解析作业失败 @status102
+* 肉鸽重试时误点进招募界面 @Saratoga-Official
+* 移除 ExceptionStacktrace.hpp @status102
+* 收取好友线索延迟 @ABA2396
 
 ### 文档 | Docs
 
-* 连战次数文档更新 @status102
-* 更正保全派驻协议文档中的拼写错误 (#12578) @lucienshawls
-* 更正主文档和中文文档中的两处错别字 (#12577) @lucienshawls
+* 更新 Visual C++ 可再发行程序包链接至 V14 版本 (#15360) @wryx166
 
 ### 其他 | Other
 
-* 调整提示颜色 @ABA2396
-* 开始战斗前闪退无限循环识别，关卡名检查放宽至一分钟 (#12580) @ABA2396
-* 肉鸽招募 练度不够干员的 priority 可能为正 @Daydreamer114
-* 战斗次数识别错误缓解 @status102
-* 关闭连战列表点击 @status102
-* 关闭连战列表 @status102
-* 移除肉鸽难度hard code (#12587) @status102
-* 连战次数修复, 减少hard code @status102
-* 补上之前漏改的 tasks 路径修改 @ABA2396
-* 连战减少不必要的次数调整 @status102
-* 战斗次数识别错误处理 @status102
-* 关卡理智识别流程通用化 @status102
-* 减少一次不必要的连战次数变更 @status102
-* 移除过旧的任务参数 @status102
-* 优化提示 @ABA2396
-* 连战新增 -1 表示禁用切换 @ABA2396
-* 修改连接失败提示描述 @ABA2396
-* YostarKR BattleStartPre add ocrReplace pattern @HX3N
-* YostarJP ocr edits (#12607) @Manicsteiner
-* HttpService调整, Post函数追加 (#12605) @status102
-* 好像提示了也没人看 @ABA2396
-* 加点常用的进来 @status102
-* 调整超时提醒输出 @ABA2396
-* 理智识别 @status102
-* Reapply "feat:实现自适应调整连战次数 (#12555)" @Yoak3n @ABA2396
+* 调整战斗结束后的点击位置 @ABA2396
+* 悖论模拟自动战斗任务翻译 @ABA2396
+
+## v6.2.0
+
+### 新增 | New
+
+* 重构仓库识别结构，支持根据关卡掉落情况自动更新 (#15358) @ABA2396
+* 成就 DLC 功能 (#15288) @ABA2396
+* 增强自动战斗文件选择功能，支持多级路径和相对目录 (#15174) @momomochi987 @ABA2396
+* 允许设置是否启用线索交流与赠送线索 (#15278) @ABA2396
+* 增加冬时至基建温蒂组并调整温蒂组选人逻辑 (#15294) @drway
+* 通知渠道添加 Gotify (#15284) @2436238575
+* 给 Bark 通知添加默认的分类组 (#15244) @Anselyuki
+* 重构主页日志侧边栏整体布局和样式 (#15211) @MistEO @ABA2396
+* 支持日志样式切换 @ABA2396
+* 基建设施缩略图 @ABA2396
+* 自动战斗日志栏添加日志悬浮窗按钮 @ABA2396
+* 关卡提示支持显示库存 @ABA2396
+* 更新库存提示移到 ToolTip @ABA2396
+* 可以点击 20 次按钮关闭公告弹窗 @ABA2396
+* 日志允许图片更新时不添加内容 @ABA2396
+* 限制使用 CPU 推理时的线程占用数，优先保证模拟器运行 @ABA2396
+* 基建进入设施失败时保留测试截图 @ABA2396
+* 将自动重载资源独立出来，在 debug 模式下显示勾选框 @ABA2396
+* 尝试增加 B 服开屏活动跳过 @ABA2396
+* 检测到自身处于临时路径中时阻止启动 (#14961) @Rbqwow @ABA2396
+* 企鹅物流上报 ID 不为空时禁止被上报结果赋值 @ABA2396
+* 新增肉鸽主题推荐配置 tip 并适配多语言 (#15324) @hcl55 @HX3N @Manicsteiner @Constrat @momomochi987 @ABA2396
+* SideStory 「雅赛努斯复仇记」导航 @SherkeyXD
+* Disable CoreML for detection and recognition on macOS @MistEO
+
+### 改进 | Improved
+
+* 重构自动战斗标签页逻辑，拆分悖论模拟任务 (#15327) @ABA2396 @yali-hzy @status102 @HX3N @Constrat
+* 刷理智任务指定次数与代理倍率冲突提醒 (#15233) @status102 @HX3N @momomochi987 @Manicsteiner
+* 优化线索交流、获取好友线索逻辑 @ABA2396
+* 优化界面显示效果与换行 @ABA2396
+* 优化缩略图逻辑 @ABA2396
+* 优化 PropertyDependsOnHelper 实现 @ABA2396
+* 将 PropertyDependsOnViewModel 改为静态工具类 @ABA2396
+* 调整缩略图 ToolTip 延迟 @ABA2396
+* 在禁用时 TooltipBlock 显示特效 (#15260) @yali-hzy @ABA2396
+* 重命名以符合文件结构 @ABA2396
+* devcontainer 从 conda 迁移至 mise/uv (#15251) @SherkeyXD
+* rename Dps to Ops (#15325) @ABA2396
+
+### 修复 | Fix
+
+* 界园肉鸽因点击模板边缘导致关卡进不去 @Saratoga-Official
+* 肉鸽暂停按钮更新 @ABA2396
+* 20260109 游戏更新导致自动战斗失效 @status102
+* 同时开启「剿灭模式」和「备选关卡」会导致「企鹅物流汇报 ID」被修改 @ABA2396
+* 无法通过删除自动战斗输入框内容清除当前作业，无法通过在输入框输入神秘代码直接开始战斗 @ABA2396
+* 线索数量识别 @ABA2396
+* 线索板上有线索时无法一键放置线索 @ABA2396
+* 肉鸽未填写开局干员时借助战强制为 false @ABA2396
+* 隐秘战线结局识别 @ABA2396
+* 隐秘战线识别到多余字符时无法进入对应事件 @ABA2396
+* 给缺失干员检查补上 Unavailable (#15296) @Alan-Charred
+* 尝试修复基建效率计算中的 out_of_range 异常 @ABA2396
+* 远程控制截图无法获取最新图像 (#15276) @Hakuin123
+* Debug 图片保存目录 (#15250) @hguandl
+* 修复文档站搜索问题 @SherkeyXD
+* 鬼影迷踪 -> 诡影迷踪 @ABA2396
+* 撷英调香师 @ABA2396
+* 避免其他 locale 下，掉落次数误认数字字符 (#15306) @aflyhorse
+* ai review @ABA2396
+* Filename too long @Daydreamer114
+* update DormMini.png for EN (again) @Constrat
+* fix SA1518 warnings @Constrat
+* SA1633 warning missing copyright notice @Constrat
+* waydroid rawbync screencap 2>/dev/null (#15196) @commondservice
+
+### 文档 | Docs
+
+* 使用脚本一键安装 maa-cli (#15283) @wangl-cc
+* 战斗协议 移动镜头 (#15261) @Daydreamer114
+* 源码链接同步最新行数 @Rbqwow
+* 中文集成文档统一格式 @ABA2396
+* update KR documents (#15282) @HX3N
+* update vsc ext docs for quick ocr (#15298) @neko-para @HX3N @Constrat
+
+### 其他 | Other
+
+* 移除地图未修复期间的临时糊屎, 移除未更正的注释 @status102
+* 添加雪猎基建技能加成 @Saratoga-Official
+* 调整文件夹判断逻辑 @ABA2396
+* 调整注释 @ABA2396
+* 调整 MaxNumberOfLogThumbnails 作用域，调整默认数量 @ABA2396
+* 微调公告确认按钮位置 @SherkeyXD
+* 移除多余关卡 @SherkeyXD
+* 添加挂调试器下使用 GPU 的注释 @ABA2396
+* add IsDebugVersion to _forcedReloadResource (#15293) @Constrat
+* port changes from api @SherkeyXD
+* H16-4, 引航者 #6 TN-1~TN-4 剩余地图 view[1] @status102
+* YostarKR tweak AS-OpenOcr @HX3N
+* YostarJP roguelike JieGarden ocr edit @Manicsteiner
+* YoStarJP SN device ocr (#15310) @cheriu
+* EN for `FightTimesMayNotExhausted` @Constrat

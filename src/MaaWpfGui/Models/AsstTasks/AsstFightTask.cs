@@ -1,6 +1,6 @@
 // <copyright file="AsstFightTask.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -10,6 +10,7 @@
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY
 // </copyright>
+
 #nullable enable
 using System.Collections.Generic;
 using MaaWpfGui.Services;
@@ -59,7 +60,7 @@ public class AsstFightTask : AsstBaseTask
     public int Series { get; set; } = 1;
 
     /// <summary>
-    /// Gets or sets a value indicating whether gets or sets 葛朗台
+    /// Gets or sets a value indicating whether 葛朗台
     /// </summary>
     [JsonProperty("DrGrandet")]
     public bool IsDrGrandet { get; set; }
@@ -78,6 +79,7 @@ public class AsstFightTask : AsstBaseTask
     /// <summary>
     /// Gets or sets 企鹅物流回报id, 可选，默认为空。仅在 <see cref="ReportToPenguin"/> 为 true 时有效
     /// </summary>
+    [JsonProperty("penguin_id")]
     public string PenguinId { get; set; } = string.Empty;
 
     /// <summary>
@@ -89,6 +91,7 @@ public class AsstFightTask : AsstBaseTask
     /// <summary>
     ///  Gets or sets 一图流回报id，可选，默认为空。仅在 <see cref="ReportToYituliu"/> 为 true 时有效
     /// </summary>
+    [JsonProperty("yituliu_id")]
     public string YituliuId { get; set; } = string.Empty;
 
     /// <summary>
@@ -106,14 +109,14 @@ public class AsstFightTask : AsstBaseTask
     public override (AsstTaskType TaskType, JObject Params) Serialize()
     {
         var param = JObject.FromObject(this);
-        if (ReportToPenguin && !string.IsNullOrWhiteSpace(PenguinId))
+        if (!ReportToPenguin || string.IsNullOrWhiteSpace(PenguinId))
         {
-            param["penguin_id"] = PenguinId;
+            param.Remove("penguin_id");
         }
 
-        if (ReportToYituliu && !string.IsNullOrWhiteSpace(YituliuId))
+        if (!ReportToYituliu || string.IsNullOrWhiteSpace(YituliuId))
         {
-            param["yituliu_id"] = YituliuId;
+            param.Remove("yituliu_id");
         }
 
         if (Drops.Count > 0)

@@ -1,6 +1,6 @@
 // <copyright file="GenericCombinedData.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -11,37 +11,35 @@
 // but WITHOUT ANY WARRANTY
 // </copyright>
 
-using System.ComponentModel;
 using Stylet;
 
-namespace MaaWpfGui.Utilities.ValueType
+namespace MaaWpfGui.Utilities.ValueType;
+
+/// <summary>
+/// Generic combined data class.
+/// </summary>
+/// <typeparam name="TValueType">The type of value.</typeparam>
+public class GenericCombinedData<TValueType> : PropertyChangedBase
 {
+    private string _name = string.Empty;
+
     /// <summary>
-    /// Generic combined data class.
+    /// Gets or sets the name displayed.
     /// </summary>
-    /// <typeparam name="TValueType">The type of value.</typeparam>
-    public class GenericCombinedData<TValueType> : PropertyChangedBase
+    public string Display
     {
-        private string _name = string.Empty;
+        get => _name;
+        set => SetAndNotify(ref _name, value);
+    }
 
-        /// <summary>
-        /// Gets or sets the name displayed.
-        /// </summary>
-        public string Display
-        {
-            get => _name;
-            set => SetAndNotify(ref _name, value);
-        }
+    private TValueType _value;
 
-        private TValueType _value;
-
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        public TValueType Value
-        {
-            get => _value;
-            set => SetAndNotify(ref _value, value);
-        }
+    /// <summary>
+    /// Gets or sets the value.
+    /// </summary>
+    public TValueType Value
+    {
+        get => _value;
+        set => SetAndNotify(ref _value, value);
     }
 }

@@ -1,18 +1,21 @@
 #pragma once
+
+#include <optional>
 #include <set>
 
 #include "Common/AsstBattleDef.h"
+#include "MaaUtils/NoWarningCVMat.hpp"
 #include "Task/AbstractTask.h"
+#include "Ui/SupportList.h"
 #include "Vision/TemplDetOCRer.h"
 
 namespace asst
 {
-class UseSupportUnitTaskPlugin;
 
 class BattleFormationTask : public AbstractTask
 {
 public:
-    BattleFormationTask(const AsstCallback& callback, Assistant* inst, std::string_view task_chain);
+    using AbstractTask::AbstractTask;
     virtual ~BattleFormationTask() override = default;
 
     enum class Filter
@@ -29,6 +32,11 @@ public:
         battle::RoleCounts role_counts;
     };
 
+    struct QuickFormationOper : public asst::TemplDetOCRer::Result
+    {
+        bool is_selected = false; // 是否选中
+    };
+
     void append_additional_formation(AdditionalFormation formation) { m_additional.emplace_back(std::move(formation)); }
 
     // 设置追加自定干员列表
@@ -36,6 +44,9 @@ public:
 
     // 是否追加低信赖干员
     void set_add_trust(bool add_trust) { m_add_trust = add_trust; }
+
+    // 设置是否跳过未满足的干员属性要求
+    void set_ignore_requirements(bool value) { m_ignore_requirements = value; }
 
     // 设置对指定编队自动编队
     void set_select_formation(int index) { m_select_formation_index = index; }
@@ -58,10 +69,10 @@ public:
     // ————————————————————————————————
     enum class SupportUnitUsage // 助战干员使用策略
     {
-        None = 0,               // 不使用助战干员
-        WhenNeeded = 1,         // 如果有且仅有一名缺失干员则尝试寻找助战干员补齐编队, 如果无缺失干员则不使用助战干员
-        Specific = 2,           // 如果有且仅有一名缺失干员则尝试寻找助战干员补齐编队，如果无缺失干员则使用指定助战干员
-        Random = 3              // 如果有且仅有一名缺失干员则尝试寻找助战干员补齐编队，如果无缺失干员则使用随机助战干员
+        None = 0,               // 不加助战干员
+        WhenNeeded = 1,         // 如果仅缺一名干员则尝试补助战,
+        Specific = 2,           // 如果仅缺一名干员则尝试补助战，如无缺失则使用指定助战干员
+        Random = 3              // 如果仅缺一名干员则尝试补助战，如无缺失则随机加一个助战干员
     };
 
     void set_support_unit_usage(const SupportUnitUsage& value) { m_support_unit_usage = value; }
@@ -80,34 +91,44 @@ protected:
 
     virtual bool _run() override;
     bool parse_formation();
+    // 判断当前编队是否与上次相同, 同时为相同部分添加进已选中, return 是否完全相同
+    bool compare_formation();
     bool is_formation_valid(const cv::Mat& img) const;
     bool select_formation(int select_index, const cv::Mat& img);
     bool enter_selection_page(const cv::Mat& img = cv::Mat());
     // 进入快捷编队清空选择后执行，快速选择非干员组的干员
     void formation_with_last_opers();
-    bool add_formation(battle::Role role, std::vector<OperGroup> oper_group, std::vector<OperGroup>& missing);
+    bool add_formation(battle::Role role, const std::vector<OperGroup*>& oper_group);
     // 追加附加干员（按部署费用等小分类）
     bool add_additional();
     // 补充刷信赖的干员，从最小的开始
     bool add_trust_operators();
-    bool select_opers_in_cur_page(std::vector<OperGroup>& groups);
+    // 选择当前页中的干员, return 是否继续翻页
+    bool select_opers_in_cur_page(const std::vector<OperGroup*>& groups);
+    // 检查并选中技能, return 技能是否达到要求
+    bool check_and_select_skill(const std::string& name, int skill, int level_required, bool ignore, int delay);
+    // 查找并匹配技能, return 技能区域及技能等级, reverse 为反向查找3技能
+    std::optional<std::pair<asst::Rect, int>> find_skill(const cv::Mat& image, int skill, bool reverse);
     void swipe_page();
     void swipe_to_the_left(int times = 2);
     bool confirm_selection();
     bool click_role_table(battle::Role role);
     bool select_random_support_unit();
-    void report_missing_operators(std::vector<OperGroup>& groups);
+    void report_missing_operators();
+    // 干员组中有干员已被选中
+    bool has_oper_selected(const std::vector<asst::battle::OperUsage>& opers) const;
+    bool has_oper_unchecked(const std::vector<asst::battle::OperUsage>& opers) const;
 
-    std::vector<asst::TemplDetOCRer::Result> analyzer_opers();
+    std::vector<QuickFormationOper> analyzer_opers(const cv::Mat& image);
 
-    std::string m_stage_name;
-    std::unordered_map<battle::Role, std::vector<OperGroup>> m_formation;
-    std::unordered_map<battle::Role, std::vector<OperGroup>> m_user_formation;
-    int m_size_of_operators_in_formation = 0;                             // 编队中干员个数
+    std::unordered_map<battle::Role, std::vector<OperGroup>> m_formation;      // 作业编队
+    std::unordered_map<battle::Role, std::vector<OperGroup>> m_formation_last; // 上次的编队
+    // 编队中的干员名称-所属组名, 传递给外部使用, 编入的干员需要存入该表
     std::shared_ptr<std::unordered_map<std::string, std::string>> m_opers_in_formation =
-        std::make_shared<std::unordered_map<std::string, std::string>>(); // 编队中的干员名称-所属组名
-    bool m_add_trust = false;                                             // 是否需要追加信赖干员
-    std::vector<std::pair<std::string, int>> m_user_additional;           // 追加干员表，从头往后加
+        std::make_shared<std::unordered_map<std::string, std::string>>();
+    bool m_add_trust = false;                                   // 是否需要追加信赖干员
+    bool m_ignore_requirements = false;                         // 是否跳过未满足的干员属性要求
+    std::vector<std::pair<std::string, int>> m_user_additional; // 追加干员表，从头往后加
     DataResource m_data_resource = DataResource::Copilot;
     std::vector<AdditionalFormation> m_additional;
     std::string m_last_oper_name;
@@ -117,7 +138,21 @@ protected:
     // ————————————————————————————————
     // 助战干员选择相关
     // ————————————————————————————————
-    std::shared_ptr<UseSupportUnitTaskPlugin> m_use_support_unit_task_ptr = nullptr;
+    using Friendship = battle::Friendship;
+    using Role = battle::Role;
+    using OperModule = battle::OperModule;
+    using RequiredOper = battle::RequiredOper;
+
+    std::optional<std::string> add_support_unit(
+        const std::vector<RequiredOper>& required_opers = {},
+        size_t max_refresh_times = 5,
+        Friendship friendship = Friendship::Stranger);
+
+    std::optional<std::string> add_support_unit_from_support_list(
+        SupportList& support_list,
+        const std::vector<RequiredOper>& required_opers,
+        Friendship friendship = Friendship::Stranger);
+
     SupportUnitUsage m_support_unit_usage = SupportUnitUsage::None;
     bool m_used_support_unit = false; // 是否已经招募助战干员
     // ———————— 以下变量为指定助战干员设置，仅当 m_support_unit_usage == SupportUnitUsage::Specific 时有效 ————————

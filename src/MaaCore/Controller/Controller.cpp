@@ -2,13 +2,12 @@
 
 #include "Utils/Platform.hpp"
 
-#include <regex>
+#include <boost/regex.hpp>
 #include <utility>
 #include <vector>
 
 #include "Assistant.h"
-#include "Common/AsstConf.h"
-#include "Utils/NoWarningCV.h"
+#include "MaaUtils/NoWarningCV.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -30,8 +29,7 @@
 
 asst::Controller::Controller(const AsstCallback& callback, Assistant* inst) :
     InstHelper(inst),
-    m_callback(callback),
-    m_rand_engine(std::random_device {}())
+    m_callback(callback)
 {
     LogTraceFunction;
 }
@@ -199,10 +197,12 @@ bool asst::Controller::swipe(
     bool extra_swipe,
     double slope_in,
     double slope_out,
-    bool with_pause)
+    bool with_pause,
+    bool high_resolution_swipe_fix)
 {
     CHECK_EXIST(m_controller, false);
-    return m_scale_proxy->swipe(r1, r2, duration, extra_swipe, slope_in, slope_out, with_pause);
+    return m_scale_proxy
+        ->swipe(r1, r2, duration, extra_swipe, slope_in, slope_out, with_pause, high_resolution_swipe_fix);
 }
 
 bool asst::Controller::inject_input_event(InputEvent& event)

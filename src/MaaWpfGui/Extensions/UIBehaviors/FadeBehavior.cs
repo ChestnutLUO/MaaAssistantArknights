@@ -1,6 +1,6 @@
 // <copyright file="FadeBehavior.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -52,10 +52,11 @@ public static class FadeBehavior
             return;
         }
 
+        element.BeginAnimation(UIElement.OpacityProperty, null);
+
         // 获取动画持续时间（使用附加属性或默认值）
         var duration = GetDuration(d);
 
-        var storyboard = new Storyboard();
         var animation = new DoubleAnimation
         {
             Duration = new(duration),
@@ -77,16 +78,13 @@ public static class FadeBehavior
             animation.Completed += (s, _) =>
             {
                 // 动画完成后才真正隐藏元素
-                if (element.Opacity == 0) // 确保没有其他动画改变透明度
-                {
+                if (element.Opacity == 0)
+                {// 确保没有其他动画改变透明度
                     element.Visibility = Visibility.Collapsed;
                 }
             };
         }
 
-        Storyboard.SetTarget(animation, element);
-        Storyboard.SetTargetProperty(animation, new PropertyPath(UIElement.OpacityProperty));
-        storyboard.Children.Add(animation);
-        storyboard.Begin();
+        element.BeginAnimation(UIElement.OpacityProperty, animation);
     }
 }

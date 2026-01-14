@@ -4,7 +4,7 @@
 
 namespace asst
 {
-class CopilotConfig : public SingletonHolder<CopilotConfig>, public AbstractConfig
+class CopilotConfig : public MAA_NS::SingletonHolder<CopilotConfig>, public AbstractConfig
 {
 public:
     static battle::copilot::BasicInfo parse_basic_info(const json::value& json);
@@ -20,7 +20,6 @@ public:
 
     const std::string& get_stage_name() const noexcept { return m_data.info.stage_name; }
 
-    bool parse_magic_code(const std::string& copilot_magic_code);
     void clear();
 
 protected:

@@ -108,7 +108,7 @@
         "description": "需要多少矿石才能提炼出如此贵重的金条呢——之类的想法已经不重要了。现在它正整整齐齐堆在你眼前，这才是关键啊。",
         "icon": "3003.png",
         "name": "赤金",
-        "sortId": 10005,
+        "sortId": 10202,
         "usage": "提纯精炼后的金条，可以换取大量龙门币。"
     },
     "30031": {
@@ -796,7 +796,7 @@
         "description": "经济危机发生后，经济的衰退与政权之间的对立让贸易参与者们举步维艰。龙门币的流通使商业复兴成为可能。",
         "icon": "4001.png",
         "name": "龙门币",
-        "sortId": 10004,
+        "sortId": 10201,
         "usage": "由龙门发行的货币，用途广泛。"
     },
     "4002": {
@@ -820,7 +820,7 @@
         "description": "感染者隔离法案是现代国家最后的遮羞布。只要你运用些许特殊的技巧，这一切便如薄纸般不堪一击——莱塔尼亚的一位导师曾如此教导她。",
         "icon": "4004.png",
         "name": "高级凭证",
-        "sortId": 10006,
+        "sortId": 10203,
         "usage": "代表干员拥有某方向专业能力的权威性凭证，可用于兑换稀有物资。"
     },
     "4005": {
@@ -828,7 +828,7 @@
         "description": "当今时代，搜罗人才是一件困难的事；而若要从躲在阴暗处的感染者中寻求可用之才，更无异于大海捞针。如果罗德岛能成为包容所有人的大海，是否就可以省去诸多烦恼呢？",
         "icon": "4005.png",
         "name": "资质凭证",
-        "sortId": 10007,
+        "sortId": 10204,
         "usage": "代表干员拥有普通能力的凭证，可用于兑换物资。"
     },
     "4006": {
@@ -836,7 +836,7 @@
         "description": "维持罗德岛的运转需要巨额经费和庞杂的原料，所以，通过各类渠道进行商业活动以平衡开支是必要的。",
         "icon": "4006.png",
         "name": "采购凭证",
-        "sortId": 10008,
+        "sortId": 10205,
         "usage": "代表罗德岛商业运作资质的凭证，可用于兑换物资。"
     },
     "5001": {
@@ -908,7 +908,7 @@
         "description": "冷酷有效的赏金机制，是危机合约系统正常运作的唯一保证。",
         "icon": "CRISIS_SHOP_COIN.png",
         "name": "合约赏金",
-        "sortId": 10201,
+        "sortId": 10501,
         "usage": "完成危机合约后得到的报酬。可用于兑换补给品。"
     },
     "CRISIS_SHOP_COIN_V2": {
@@ -916,7 +916,7 @@
         "description": "冷酷有效的赏金机制，是危机合约系统正常运作的唯一保证。",
         "icon": "CRISIS_SHOP_COIN_V2.png",
         "name": "晶体合约赏金",
-        "sortId": 10202,
+        "sortId": 10502,
         "usage": "完成危机合约后得到的报酬。可用于兑换补给品。"
     },
     "EPGS_COIN": {
@@ -924,7 +924,7 @@
         "description": "能够考虑到这一点，多少可以证明猎头公司的诚意。需要注意的是，如果试图用这种手段来补充资源，恐怕会得不偿失。",
         "icon": "EPGS_COIN.png",
         "name": "寻访参数模型",
-        "sortId": 10101,
+        "sortId": 10401,
         "usage": "新型招聘合约中对于过期契约的处理手段，可用来兑换各种资源。"
     },
     "EXTERMINATION_AGENT": {
@@ -975,12 +975,20 @@
         "sortId": 40003,
         "usage": "罗德岛人事部特别批发的许可书，在特殊的时间点上招揽特殊的人才，一次可招聘十位干员。"
     },
+    "LINKAGE_TKT_GACHA_10_6501": {
+        "classifyType": "NORMAL",
+        "description": "为了确保人才扩展而应博士要求准备的应急手段，该批寻访条目具有一定的针对性与时效性，以及，小小的风险。",
+        "icon": "LINKAGE_TKT_GACHA_10_6501.png",
+        "name": "坠梦歌谣寻访凭证",
+        "sortId": 40003,
+        "usage": "罗德岛人事部特别批发的许可书，在特殊的时间点上招揽特殊的人才，一次可招聘十位干员。"
+    },
     "LMTGS_COIN_1401": {
         "classifyType": "NORMAL",
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_1401.png",
         "name": "寻访数据契约",
-        "sortId": 10011,
+        "sortId": 10303,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_1601": {
@@ -988,7 +996,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_1601.png",
         "name": "寻访数据契约",
-        "sortId": 10012,
+        "sortId": 10304,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_1803": {
@@ -996,7 +1004,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_1803.png",
         "name": "寻访数据契约",
-        "sortId": 10013,
+        "sortId": 10305,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_2101": {
@@ -1004,7 +1012,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_2101.png",
         "name": "寻访数据契约",
-        "sortId": 10014,
+        "sortId": 10306,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_2301": {
@@ -1012,7 +1020,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_2301.png",
         "name": "寻访数据契约",
-        "sortId": 10015,
+        "sortId": 10307,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_2501": {
@@ -1020,7 +1028,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_2501.png",
         "name": "寻访数据契约",
-        "sortId": 10016,
+        "sortId": 10308,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_2701": {
@@ -1028,7 +1036,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_2701.png",
         "name": "寻访数据契约",
-        "sortId": 10017,
+        "sortId": 10309,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_3001": {
@@ -1036,7 +1044,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_3001.png",
         "name": "寻访数据契约",
-        "sortId": 10018,
+        "sortId": 10310,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_3301": {
@@ -1044,7 +1052,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_3301.png",
         "name": "寻访数据契约",
-        "sortId": 10019,
+        "sortId": 10311,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_3501": {
@@ -1052,7 +1060,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_3501.png",
         "name": "寻访数据契约",
-        "sortId": 10019,
+        "sortId": 10312,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_3801": {
@@ -1060,7 +1068,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_3801.png",
         "name": "寻访数据契约",
-        "sortId": 10020,
+        "sortId": 10313,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_4101": {
@@ -1068,7 +1076,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_4101.png",
         "name": "寻访数据契约",
-        "sortId": 10021,
+        "sortId": 10314,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_4401": {
@@ -1076,7 +1084,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_4401.png",
         "name": "寻访数据契约",
-        "sortId": 10022,
+        "sortId": 10315,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_4701": {
@@ -1084,7 +1092,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_4701.png",
         "name": "寻访数据契约",
-        "sortId": 10023,
+        "sortId": 10316,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_5001": {
@@ -1092,7 +1100,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_5001.png",
         "name": "寻访数据契约",
-        "sortId": 10024,
+        "sortId": 10317,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_5301": {
@@ -1100,7 +1108,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_5301.png",
         "name": "寻访数据契约",
-        "sortId": 10025,
+        "sortId": 10318,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_5601": {
@@ -1108,7 +1116,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_5601.png",
         "name": "寻访数据契约",
-        "sortId": 10026,
+        "sortId": 10319,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_5801": {
@@ -1116,7 +1124,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_5801.png",
         "name": "寻访数据契约",
-        "sortId": 10026,
+        "sortId": 10320,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_601": {
@@ -1124,7 +1132,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_601.png",
         "name": "寻访数据契约",
-        "sortId": 10009,
+        "sortId": 10301,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_6101": {
@@ -1132,7 +1140,15 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_6101.png",
         "name": "寻访数据契约",
-        "sortId": 10027,
+        "sortId": 10321,
+        "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
+    },
+    "LMTGS_COIN_6401": {
+        "classifyType": "NORMAL",
+        "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
+        "icon": "LMTGS_COIN_6401.png",
+        "name": "寻访数据契约",
+        "sortId": 10322,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "LMTGS_COIN_903": {
@@ -1140,7 +1156,7 @@
         "description": "与猎头公司长久且稳定的合作关系带来的回报，可有效控制支出。不过，但愿不是每次都需要用到这个手段。",
         "icon": "LMTGS_COIN_903.png",
         "name": "寻访数据契约",
-        "sortId": 10010,
+        "sortId": 10302,
         "usage": "新型招聘合约所约定的一种时限货币，累积一定数量后可在指定时期内招聘指定干员。"
     },
     "Logistics_Special_Permit": {
@@ -1156,7 +1172,7 @@
         "description": "为鼓励干员积极进行过往事件的复盘与检讨，经上层讨论后发起的长期活动，在重复进行某事件的回顾后可以获得该凭证，并前往后勤部交换资源。事件的指定由系统随机选择。",
         "icon": "REP_COIN.png",
         "name": "情报凭证",
-        "sortId": 10102,
+        "sortId": 10402,
         "usage": "重复回顾过往事件的奖励，可用来兑换各种资源。"
     },
     "RETRO_COIN": {
@@ -1228,7 +1244,7 @@
         "description": "罗德岛的情报处理系统的一个次要功能。从庞杂的信息中提取有效情报后，经过特殊处理，以影像的形式还原出各种事件的流程，精确程度令当事人都感到惊叹。\n做成录像带的样子只是为了方便一般人理解。",
         "icon": "STORY_REVIEW_COIN.png",
         "name": "事相碎片",
-        "sortId": 10203,
+        "sortId": 10503,
         "usage": "有效情报的拓扑模型，可以用来重建过往事件。"
     },
     "act10d5_token_biscuit": {
@@ -1551,6 +1567,14 @@
         "sortId": -10000,
         "usage": "处于激情中的音乐家时常忘记自己将草稿丢在何处。将草稿整理清楚交还给他，或许可以收获一首新曲。"
     },
+    "act19mini_token_sweetie": {
+        "classifyType": "NONE",
+        "description": "即将成伥的小物件，趁人不注意到处打滚儿。街角的恶作剧、灶台深处的异响......诡异的氛围弥漫在小镇各处。",
+        "icon": "act19mini_token_sweetie.png",
+        "name": "“棠梨儿”",
+        "sortId": -10000,
+        "usage": "只要将尚未化形的迷路伥怪带到蒲先生那里去，他总会拿出一些有趣的小玩意来表示感谢。你发现，他先前捡来的小物件，都已有了自己的名字。"
+    },
     "act19side_token_reagents": {
         "classifyType": "NONE",
         "description": "对神经活动十分敏感，可替代传统施术单元的部分功能。在莱茵生命防卫科的实验用品管理手册上，该试剂危险等级与保密等级均为最高。",
@@ -1567,6 +1591,14 @@
         "sortId": -10000,
         "usage": "关卡首通报酬，用于在博物馆兑换台换取奖励；首通后复刷不会再次获得。"
     },
+    "act1autochess_token_chess": {
+        "classifyType": "NONE",
+        "description": "罗德岛工坊为参与卫戍协议的干员准备的勋章，带有磁性，听说集齐一定数量便可合成一个堡垒棋子。",
+        "icon": "act1autochess_token_chess.png",
+        "name": "卫戍认证",
+        "sortId": -10000,
+        "usage": "用于在卫戍协议中兑换各类物资。"
+    },
     "act1bossrush_milestone_point": {
         "classifyType": "NONE",
         "description": "模拟中的对错并不重要，它们只是种辅助，帮助你在实战中做出正确的选择。",
@@ -1582,6 +1614,14 @@
         "name": "数据黑盒",
         "sortId": -10000,
         "usage": "用于对遏制单元进行数据迭代。"
+    },
+    "act1break_milestone_point": {
+        "classifyType": "NONE",
+        "description": "普通的标识牌。 在圆凳滑行赛中被作为加速指示牌使用之后，受到了关注这项赛事的干员们的喜爱，逐渐成为一种收藏品。",
+        "icon": "act1break_milestone_point.png",
+        "name": "“小心地滑”",
+        "sortId": -10000,
+        "usage": "可在突破里程碑中兑换奖励。"
     },
     "act1collection_point_token": {
         "classifyType": "NONE",
@@ -1639,6 +1679,14 @@
         "sortId": -10000,
         "usage": "用以在里程碑处兑换奖励。"
     },
+    "act1teamquest_point": {
+        "classifyType": "NONE",
+        "description": "促融共竞能有今日的盛况，正是因为有您的全力支持。",
+        "icon": "act1teamquest_point.png",
+        "name": "共竞积分",
+        "sortId": -10000,
+        "usage": "用于兑换相应的阶段性活动奖励。"
+    },
     "act1vautochess_token_chess": {
         "classifyType": "NONE",
         "description": "罗德岛工坊为参与卫戍协议的干员准备的勋章，带有磁性，听说集齐一定数量便可合成一个堡垒棋子。",
@@ -1654,6 +1702,126 @@
         "name": "胜绩积分",
         "sortId": -10000,
         "usage": "可在突破里程碑中兑换奖励。"
+    },
+    "act1vhalfidle_asc_cst": {
+        "classifyType": "NONE",
+        "description": "代表着精英术师干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_cst.png",
+        "name": "术师进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_grd": {
+        "classifyType": "NONE",
+        "description": "代表着精英近卫干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_grd.png",
+        "name": "近卫进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_med": {
+        "classifyType": "NONE",
+        "description": "代表着精英医疗干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_med.png",
+        "name": "医疗进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_pio": {
+        "classifyType": "NONE",
+        "description": "代表着精英先锋干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_pio.png",
+        "name": "先锋进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_snp": {
+        "classifyType": "NONE",
+        "description": "代表着精英狙击干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_snp.png",
+        "name": "狙击进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_spc": {
+        "classifyType": "NONE",
+        "description": "代表着精英特种干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_spc.png",
+        "name": "特种进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_sup": {
+        "classifyType": "NONE",
+        "description": "代表着精英辅助干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_sup.png",
+        "name": "辅助进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_asc_tnk": {
+        "classifyType": "NONE",
+        "description": "代表着精英重装干员职称的信物。持有它便说明持有者已经在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_asc_tnk.png",
+        "name": "重装进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中进行干员精英职称晋升。"
+    },
+    "act1vhalfidle_gacha_newplayer": {
+        "classifyType": "NONE",
+        "description": "封装矿核精炼提纯后的产物，存量稀少，一般作为开拓新生产基地时的启动资源使用。",
+        "icon": "act1vhalfidle_gacha_newplayer.png",
+        "name": "精炼矿核",
+        "sortId": -10000,
+        "usage": "可用来在专项任命中任命干员。"
+    },
+    "act1vhalfidle_gacha_normal": {
+        "classifyType": "NONE",
+        "description": "从源石矿脉核心位置取出并妥善封存的矿石样本。在缺少必要精炼提纯工业条件的环境下，封装矿核可以作为高纯度源石燃料的替代品。",
+        "icon": "act1vhalfidle_gacha_normal.png",
+        "name": "封装矿核",
+        "sortId": -10000,
+        "usage": "可用来在随机任命中任命干员。"
+    },
+    "act1vhalfidle_itempack_asc": {
+        "classifyType": "NONE",
+        "description": "代表着精英称号的信物。持有它便说明持有者在前哨支点的生产建设中得到了充分的认可。",
+        "icon": "act1vhalfidle_itempack_asc.png",
+        "name": "精英进阶信物",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中为干员晋升精英职称。"
+    },
+    "act1vhalfidle_level_exp": {
+        "classifyType": "NONE",
+        "description": "踏入前哨支点，最为必需的便是不怕艰苦的勇气和谦虚好学的态度。请牢记：安全生产，人人有责。从头学起，分秒必争。",
+        "icon": "act1vhalfidle_level_exp.png",
+        "name": "培训手册",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中提升干员的培训等级。"
+    },
+    "act1vhalfidle_skill_exp": {
+        "classifyType": "NONE",
+        "description": "生产建设所需的技巧并不比在战场上厮杀需要的少。请牢记：时时注意，处处留神。齐心协力，共同进步。",
+        "icon": "act1vhalfidle_skill_exp.png",
+        "name": "技巧手册",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中提升干员的技能等级。"
+    },
+    "act1vhalfidle_strategy_point": {
+        "classifyType": "NONE",
+        "description": "带有可露希尔加密签名的虚拟信标，投放数量经过她的精密计算，可以确保从罗德岛总部调拨的援助得到更有效率的使用。\n“比起一张呆板的生产计划表格，这样难道不是更有趣吗？”",
+        "icon": "act1vhalfidle_strategy_point.png",
+        "name": "策略信标",
+        "sortId": -10000,
+        "usage": "可用来在次生预案中应用营建策略。"
+    },
+    "act1vhalfidle_token_point": {
+        "classifyType": "NONE",
+        "description": "罗德岛绝非一天建成。但每一天，我们都会将它建设得比昨天更强大。\n“为了罗德岛。”",
+        "icon": "act1vhalfidle_token_point.png",
+        "name": "资源点数",
+        "sortId": -10000,
+        "usage": "各类建设资源经换算后得出的点数。凭此点数可向可露希尔换取奖励。"
     },
     "act20side_token_book": {
         "classifyType": "NONE",
@@ -1799,6 +1967,14 @@
         "sortId": -10000,
         "usage": "用于兑换相应的阶段性活动奖励。"
     },
+    "act2enemyduel_milestone_point": {
+        "classifyType": "NONE",
+        "description": "听说使用它之后可以在整个争锋频道发送一条带有全屏烟花特效的文字。但终日使用它们对骂的有钱人或许并不知道，网站设置内能够一键屏蔽这些特效。",
+        "icon": "act2enemyduel_milestone_point.png",
+        "name": "争锋大礼花",
+        "sortId": -10000,
+        "usage": "争锋频道礼物中比较昂贵的类型，可以在网站内兑换一些实物奖励，包邮，送货上门。"
+    },
     "act2mainss_token": {
         "classifyType": "NONE",
         "description": "为了安慰那些因即将离舰而惶恐不安的孩子，Raidian制作了大批具有寻呼和留言功能的胸章，鼓励他们保持微笑，也保持联系。不少干员听说后也向Raidian求取了胸章，他们录下了祝福与鼓励的话语，撤离前将胸章藏在了各个角落。",
@@ -1806,6 +1982,14 @@
         "name": "“勇气”胸章",
         "sortId": -10000,
         "usage": "Raidian制作的胸章型通讯器。回收它们可以减少通讯网络受到的信号干扰，还可以在可露希尔那里兑换各类物资。"
+    },
+    "act2multi_token_cap": {
+        "classifyType": "NONE",
+        "description": "罗德岛促融共竞的参赛认证。“留在赛场上的是汗水，从赛场带走的是友谊。”",
+        "icon": "act2multi_token_cap.png",
+        "name": "参赛认证-S2",
+        "sortId": -10000,
+        "usage": "参赛认证的累积代表着赛事热度的攀升，达到一定热度等级即可获取对应奖励。"
     },
     "act2vmulti_token_cap": {
         "classifyType": "NONE",
@@ -1927,6 +2111,14 @@
         "sortId": -10000,
         "usage": "用于兑换相应的阶段性活动奖励。"
     },
+    "act3mainss_token": {
+        "classifyType": "NONE",
+        "description": "打火石撞击的声响隐没在茫茫雪原中，黑暗无垠，唯有这一簇炽热燃烧的火苗。它静静跳动，远望着那无边的凛冽，于寒夜中融化冰雪，只待太阳再次升起。",
+        "icon": "act3mainss_token.png",
+        "name": "打火石",
+        "sortId": -10000,
+        "usage": "在乌萨斯野外必不可少的工具，取火后足以御寒，也足以短暂照亮黑夜。矿井内严禁火源，但依然阻止不了打火石在矿工们之间流通。"
+    },
     "act40side_token_yumyum": {
         "classifyType": "NONE",
         "description": "饭香不怕巷子深。平日肉眼不可见，沿街细嗅可闻到的缥缈香气，至饭馆前则扑面而来。循着百灶街头的饭菜香，自可走出一幅百灶盛景图。",
@@ -1950,6 +2142,62 @@
         "name": "蒙恩的奶嘴",
         "sortId": -10000,
         "usage": "育婴圣堂的启圣工作进行得如火如荼，生灵与死物一齐长出了光环。初获光环的奶嘴在育婴圣堂内迷茫地游荡，导致无数婴儿夜不能寐。若你能劝它们回归职守，焦头烂额的保育员们一定很愿意以礼相谢。"
+    },
+    "act43side_token_phantom": {
+        "classifyType": "NONE",
+        "description": "那到底是什么？幽灵？道具？幻觉？还是谁*蓝卡坞片场术语*养的宠物？没人知道答案。Miss.Christine只是摇摇双尾，悠然地晒着太阳。",
+        "icon": "act43side_token_phantom.png",
+        "name": "神秘片场黑影",
+        "sortId": -10000,
+        "usage": "工期爆炸，片场高压，但“神秘黑影”总是时不时出现，让焦头烂额的工作人员甚至开始疑神疑鬼。如果能找出黑影在哪，他们会相当感谢。"
+    },
+    "act44side_token_information": {
+        "classifyType": "NONE",
+        "description": "坊间流传的琐碎话语，看似无用，却藏着不少秘密的线索。对懂得利用的人而言，即使最微小的八卦也可能成为交易的敲门砖。",
+        "icon": "act44side_token_information.png",
+        "name": "闲言碎语",
+        "sortId": -10000,
+        "usage": "用于在相谈室开启一天的营业日。毕竟每天的好故事都从闲聊开始。"
+    },
+    "act44side_token_ticket": {
+        "classifyType": "NONE",
+        "description": "票券抽选的是参加某位艺人“毕业”告别会的资格。正式活动早已取消，但它仍在粉丝间私下流转，作为对她职业生涯转折点的纪念。",
+        "icon": "act44side_token_ticket.png",
+        "name": "艺人见面抽选券",
+        "sortId": -10000,
+        "usage": "由演艺事务所分发，用于兑换抽选资格的票券。在某一起事件过后，一度成为特典中古市场上的抢手货，几乎可以换到任何东西。"
+    },
+    "act45side_token_puzzlepieces": {
+        "classifyType": "NONE",
+        "description": "再美的梦也是梦，都会消失不见。为了把它们留下来，梦城堡的主人们各自准备了美术馆，把梦当作珍贵的艺术品收藏起来。每位主人的喜好各不相同，小心不要给错人了。",
+        "icon": "act45side_token_puzzlepieces.png",
+        "name": "梦境拼图",
+        "sortId": -10000,
+        "usage": "美轮美奂的梦境拼图碎片。碎片遍布城堡的各个角落，将其悉心收集起来，可以拼凑出一幅幅定格美梦的画面。"
+    },
+    "act46side_token_detector": {
+        "classifyType": "NONE",
+        "description": "莱茵生命研发的专用于谢拉格境内的探测仪器，用来收集这片神秘雪境的各种数据，在低温环境下也能保持稳定性。 “神话只是未明缘由的现实，科学总有一天会扯下祂的面纱。”——埃琳娜坚定地相信着。",
+        "icon": "act46side_token_detector.png",
+        "name": "雪地用多功能探测器",
+        "sortId": -10000,
+        "usage": "因雪崩而散落在各处的多功能探测仪器，捡到的话请交回观测站，工作人员会用实际物资表示感谢。"
+    },
+    "act47side_token_bottle": {
+        "classifyType": "NONE",
+        "description": "只是在丰蹄能量饮料的基础上微调了香精比例的廉价糖水？谁在乎呢。如今，只有那些想不到把产品装进火箭瓶子的可悲破产厂商，才会酸涩地吐出这种无趣的事实。",
+        "icon": "act47side_token_bottle.png",
+        "name": "天空氧气瓶",
+        "sortId": -10000,
+        "usage": "以高空供氧装置为灵感设计的新概念饮品，已然成为哥伦比亚人新的血液。为了品尝一口新时代的、星荚之外的味道，没有谁不愿开出高价。"
+    },
+    "act48side_token_ostracon": {
+        "classifyType": "NONE",
+        "description": "即使如今人们手中已拥有了加载着各类程序的终端，在投票这一件事上，米诺斯人依然选择遵循古法。",
+        "icon": "act48side_token_ostracon.png",
+        "name": "投票用的陶片",
+        "sortId": -10000,
+        "usage": "雅赛努斯公民在投票时的必备品。至于用过的陶片该如何处理？理事官办公室决定收集起来，将其放入精美包装之中，出售给来到雅赛努斯的游客。这一创新的举措获得了各方的好评。"
     },
     "act4bossrush_milestone_point": {
         "classifyType": "NONE",
@@ -1983,6 +2231,30 @@
         "sortId": -10000,
         "usage": "积累此积分以获取相应的阶段性活动奖励。"
     },
+    "act5bossrush_milestone_point": {
+        "classifyType": "NONE",
+        "description": "模拟中的对错并不重要，它们只是种辅助，帮助你在实战中做出正确的选择。",
+        "icon": "act5bossrush_milestone_point.png",
+        "name": "试炼经验",
+        "sortId": -10000,
+        "usage": "试炼结束后获得的经验，可以提升试炼等级。"
+    },
+    "act5bossrush_token_relic": {
+        "classifyType": "NONE",
+        "description": "未解码的数据方块。永远记住，信息转换往往伴随着不可避免的损耗。善用信息储存工具，但别依赖它们。",
+        "icon": "act5bossrush_token_relic.png",
+        "name": "数据黑盒",
+        "sortId": -10000,
+        "usage": "用于对遏制单元进行数据迭代。"
+    },
+    "act5collection_point_token": {
+        "classifyType": "NONE",
+        "description": "为了激励外勤人员，罗德岛发放了一定量的特殊兑换点数。凭借兑换点数可兑换急需的物资。",
+        "icon": "act5collection_point_token.png",
+        "name": "特殊兑换点数",
+        "sortId": -10000,
+        "usage": "用于兑换相应的阶段性活动奖励。"
+    },
     "act5d0_point_medal": {
         "classifyType": "NONE",
         "description": "毫无意义的奢华纯金打造，由龙门顶级雕金匠亲手铸造而成，全泰拉限量发行，明明是杯子却叫做勋章，象征着大帝的最高赞誉，每一口都价值千金。但不要用来煮热咖啡！",
@@ -2006,6 +2278,30 @@
         "name": "行动协议",
         "sortId": -10000,
         "usage": "作为协议的象征，可用于解锁更多危机合约内容。"
+    },
+    "act6bossrush_milestone_point": {
+        "classifyType": "NONE",
+        "description": "模拟中的对错并不重要，它们只是种辅助，帮助你在实战中做出正确的选择。",
+        "icon": "act6bossrush_milestone_point.png",
+        "name": "试炼经验",
+        "sortId": -10000,
+        "usage": "试炼结束后获得的经验，可以提升试炼等级。"
+    },
+    "act6bossrush_token_relic": {
+        "classifyType": "NONE",
+        "description": "未解码的数据方块。永远记住，信息转换往往伴随着不可避免的损耗。善用信息储存工具，但别依赖它们。",
+        "icon": "act6bossrush_token_relic.png",
+        "name": "数据黑盒",
+        "sortId": -10000,
+        "usage": "用于对遏制单元进行数据迭代。"
+    },
+    "act6collection_point_token": {
+        "classifyType": "NONE",
+        "description": "为了激励外勤人员，罗德岛发放了一定量的特殊兑换点数。凭借兑换点数可兑换急需的物资。",
+        "icon": "act6collection_point_token.png",
+        "name": "特殊兑换点数",
+        "sortId": -10000,
+        "usage": "用于兑换相应的阶段性活动奖励。"
     },
     "act6d5_point_firecracker": {
         "classifyType": "NONE",
@@ -2084,7 +2380,7 @@
         "description": "为应对加工时部分材料紧缺的问题，采购部发行了提货券供干员们自行取用所需的材料。",
         "icon": "advanced_material_voucher_perm.png",
         "name": "高级材料提货券",
-        "sortId": 60005,
+        "sortId": 60006,
         "usage": "罗德岛采购部特别发行的提货券，凭此券可领取一份高级品质的精英材料。"
     },
     "ap_supply_lt_010": {
@@ -2215,10 +2511,26 @@
         "sortId": -10000,
         "usage": "似乎使用了昂贵的金属制作，可兑换龙门币。"
     },
+    "itempack_gold_2": {
+        "classifyType": "NONE",
+        "description": "这可不是在高级商场之类的地方花一笔钱就能买到的礼品。这是她依据自己的口味和对你喜好的推测，一瓶一瓶灌出来然后密封好的。考虑到你的工作性质，里面还有一瓶完全不含酒精的沙士。",
+        "icon": "itempack_gold_2.png",
+        "name": "精心准备的试饮套装",
+        "sortId": -10000,
+        "usage": "一份精心准备的试饮套装，可兑换龙门币。"
+    },
     "itempack_main_1": {
         "classifyType": "NONE",
         "description": "配发理智小样的材料补给箱，在恢复理智的同时能获得一种随机材料。",
         "icon": "itempack_main_1.png",
+        "name": "罗德岛补给箱",
+        "sortId": -10000,
+        "usage": "装有一个应急理智小样与一份罗德岛物资补给。"
+    },
+    "itempack_main_2": {
+        "classifyType": "NONE",
+        "description": "配发理智小样的材料补给箱，在恢复理智的同时能获得一种随机材料。",
+        "icon": "itempack_main_2.png",
         "name": "罗德岛补给箱",
         "sortId": -10000,
         "usage": "装有一个应急理智小样与一份罗德岛物资补给。"
@@ -2348,7 +2660,7 @@
         "description": "为应对加工时部分材料紧缺的问题，采购部发行了提货券供干员们自行取用所需的材料。",
         "icon": "premium_material_voucher_perm.png",
         "name": "特级材料提货券",
-        "sortId": 60004,
+        "sortId": 60005,
         "usage": "罗德岛采购部特别发行的提货券，凭此券可领取一份特级品质的精英材料。"
     },
     "randomDiamondShd_1": {
@@ -2495,6 +2807,14 @@
         "sortId": 60110,
         "usage": "装有各种物资补给，包含多种随机材料。"
     },
+    "randomMaterial_12": {
+        "classifyType": "CONSUME",
+        "description": "罗德岛从各地采购、储备的材料补给箱。不过因为缺乏系统性的整理收纳，每一个箱子里都装着截然不同的材料。",
+        "icon": "randomMaterial_12.png",
+        "name": "罗德岛物资补给IX",
+        "sortId": 60110,
+        "usage": "装有各种物资补给，包含多种随机材料。"
+    },
     "randomMaterial_2": {
         "classifyType": "CONSUME",
         "description": "通过年关后挂上的灯笼。现在也被人用来记载记忆和收纳谜题，甚至承载着遥远过去的事情。",
@@ -2541,6 +2861,14 @@
         "icon": "randomMaterial_6.png",
         "name": "罗德岛物资补给III",
         "sortId": 60106,
+        "usage": "装有各种物资补给，包含多种随机材料。"
+    },
+    "randomMaterial_6d5": {
+        "classifyType": "CONSUME",
+        "description": "罗德岛从各地采购、储备的材料补给箱。不过因为缺乏系统性的整理收纳，每一个箱子里都装着截然不同的材料。",
+        "icon": "randomMaterial_6d5.png",
+        "name": "2025感谢庆典物资补给",
+        "sortId": 60117,
         "usage": "装有各种物资补给，包含多种随机材料。"
     },
     "randomMaterial_7": {
@@ -2663,6 +2991,14 @@
         "sortId": -10000,
         "usage": null
     },
+    "rogue_5_token_bp": {
+        "classifyType": "NONE",
+        "description": null,
+        "icon": "rogue_5_token_bp.png",
+        "name": "迷路幼伥",
+        "sortId": -10000,
+        "usage": null
+    },
     "sandbox_1_tokencoin": {
         "classifyType": "NONE",
         "description": "在荒地上挥洒下的每一滴汗水，都会成为泰拉文明繁荣的见证。",
@@ -2670,6 +3006,14 @@
         "name": "繁荣点数",
         "sortId": -10000,
         "usage": "用于在“繁荣馈赠”中兑换奖励的凭证。"
+    },
+    "so_char_exp_1": {
+        "classifyType": "NONE",
+        "description": "特勤干员作战环境更加复杂，情况十分多变，录制过程相当艰苦。但能为日后的作战提供帮助，一切都是值得的。\n此次的总集篇特别追加了花絮版。",
+        "icon": "so_char_exp_1.png",
+        "name": "特勤作战记录",
+        "sortId": -10000,
+        "usage": "记录了特勤干员作战录像的储存装置，可以增加特勤干员的经验值。"
     },
     "token_Obsidian": {
         "classifyType": "NONE",

@@ -8,10 +8,9 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:s="https://github.com/canton7/Stylet"
-    xmlns:ui="clr-namespace:MaaWpfGui.ViewModels.UI"
-    xmlns:viewModels="clr-namespace:MaaWpfGui.ViewModels.UserControl.Settings"
+    xmlns:settings_vms="clr-namespace:MaaWpfGui.ViewModels.UserControl.Settings"
     d:Background="White"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:ExternalNotificationSettingsUserControlModel}}"
+    d:DataContext="{d:DesignInstance {x:Type settings_vms:ExternalNotificationSettingsUserControlModel}}"
     s:View.ActionTarget="{Binding}"
     mc:Ignorable="d">
     <Grid
@@ -19,6 +18,8 @@
         hc:InfoElement.TitlePlacement="Left"
         hc:InfoElement.TitleWidth="150">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -38,26 +39,30 @@
             TextWrapping="Wrap" />-->
 
         <StackPanel Grid.Row="1">
-            <StackPanel
-                Margin="5"
-                HorizontalAlignment="Center"
-                Orientation="Horizontal">
-                <StackPanel>
-                    <controls:TextBlock Margin="0,0,0,5" Text="{DynamicResource ExternalNotificationEnabled}" />
-                    <hc:CheckComboBox
-                        Width="200"
-                        HorizontalContentAlignment="Center"
-                        hc:InfoElement.TitleWidth="0"
-                        hc:ListBoxAttach.SelectedItems="{Binding EnabledExternalNotificationProviders}"
-                        ItemsSource="{Binding ExternalNotificationProvidersShow}" />
-                </StackPanel>
-                <Button
-                    Margin="10,0,0,0"
-                    VerticalAlignment="Bottom"
-                    Command="{s:Action ExternalNotificationSendTest,
-                                       Target={x:Type viewModels:ExternalNotificationSettingsUserControlModel}}"
-                    Content="{DynamicResource ExternalNotificationSendTest}"
-                    IsEnabled="{c:Binding 'EnabledExternalNotificationProviderCount > 0'}" />
+            <controls:TextBlock Margin="0,0,0,5" Text="{DynamicResource ExternalNotificationEnabled}" />
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <hc:CheckComboBox
+                    Width="250"
+                    HorizontalContentAlignment="Center"
+                    hc:BorderElement.CornerRadius="4,0,0,4"
+                    hc:InfoElement.TitleWidth="0"
+                    hc:ListBoxAttach.SelectedItems="{Binding EnabledExternalNotificationProviders}"
+                    ItemsSource="{Binding ExternalNotificationProvidersShow}" />
+                <Grid>
+                    <Button
+                        hc:BorderElement.CornerRadius="0,4,4,0"
+                        BorderThickness="0,1,1,1"
+                        Content="{DynamicResource ExternalNotificationSendTest}"
+                        Foreground="Transparent"
+                        Visibility="{c:Binding 'EnabledExternalNotificationProviderCount == 0'}" />
+                    <Button
+                        hc:BorderElement.CornerRadius="0,4,4,0"
+                        BorderThickness="0,1,1,1"
+                        Command="{s:Action ExternalNotificationSendTest,
+                                           Target={x:Type settings_vms:ExternalNotificationSettingsUserControlModel}}"
+                        Content="{DynamicResource ExternalNotificationSendTest}"
+                        IsEnabled="{c:Binding 'EnabledExternalNotificationProviderCount > 0'}" />
+                </Grid>
             </StackPanel>
             <StackPanel HorizontalAlignment="Center" Visibility="{c:Binding 'EnabledExternalNotificationProviderCount > 0'}">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -182,6 +187,31 @@
 
         <StackPanel
             Grid.Row="6"
+            Orientation="Vertical"
+            Visibility="{c:Binding DingTalkEnabled}">
+            <hc:Divider Content="DingTalk" />
+            <hc:PasswordBox
+                x:Name="DingTalkAccessToken"
+                Width="400"
+                Height="30"
+                Margin="10"
+                hc:InfoElement.Title="{DynamicResource ExternalNotificationDingTalkAccessToken}"
+                IsSafeEnabled="False"
+                ShowEyeButton="True"
+                UnsafePassword="{c:Binding DingTalkAccessToken}" />
+            <hc:PasswordBox
+                x:Name="DingTalkSecret"
+                Width="400"
+                Height="30"
+                Margin="10"
+                hc:InfoElement.Title="{DynamicResource ExternalNotificationDingTalkSecret}"
+                IsSafeEnabled="False"
+                ShowEyeButton="True"
+                UnsafePassword="{c:Binding DingTalkSecret}" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="7"
             HorizontalAlignment="Center"
             hc:InfoElement.TitleWidth="0"
             Visibility="{c:Binding SmtpEnabled}">
@@ -322,7 +352,7 @@
         </StackPanel>
 
         <StackPanel
-            Grid.Row="7"
+            Grid.Row="8"
             Orientation="Vertical"
             Visibility="{c:Binding BarkEnabled}">
             <hc:Divider Content="Bark" />
@@ -345,7 +375,7 @@
         </StackPanel>
 
         <StackPanel
-            Grid.Row="8"
+            Grid.Row="9"
             hc:InfoElement.TitleWidth="0"
             Orientation="Vertical"
             Visibility="{c:Binding QmsgEnabled}">
@@ -433,30 +463,59 @@
         </StackPanel>
 
         <StackPanel
-            Grid.Row="9"
+            Grid.Row="10"
             Orientation="Vertical"
-            Visibility="{c:Binding CustomWebhookEnabled}">
-            <hc:Divider Content="{DynamicResource ExternalNotificationCustomWebhook}" />
+            Visibility="{c:Binding GotifyEnabled}">
+            <hc:Divider Content="Gotify" />
             <hc:TextBox
-                x:Name="CustomWebhookUrl"
+                x:Name="GotifyServer"
                 Width="400"
                 Height="30"
                 Margin="10"
-                hc:InfoElement.Title="{DynamicResource ExternalNotificationCustomWebhookUrl}"
-                Text="{c:Binding CustomWebhookUrl}" />
-            <hc:TextBox
-                x:Name="CustomWebhookBody"
+                hc:InfoElement.Title="{DynamicResource ExternalNotificationGotifyServer}"
+                Text="{c:Binding GotifyServer}" />
+            <hc:PasswordBox
+                x:Name="GotifyToken"
                 Width="400"
-                MinHeight="20"
+                Height="30"
                 Margin="10"
-                hc:InfoElement.Placeholder="{DynamicResource ExternalNotificationCustomWebhookPlaceholders}"
-                hc:InfoElement.Title="{DynamicResource ExternalNotificationCustomWebhookBody}"
-                AcceptsReturn="True"
-                GotFocus="{s:Action CustomWebhookBodyGotFocus}"
-                LostFocus="{s:Action CustomWebhookBodyLostFocus}"
-                Text="{c:Binding CustomWebhookBody}"
-                TextWrapping="Wrap"
-                ToolTip="{DynamicResource ExternalNotificationCustomWebhookPlaceholders}" />
+                hc:InfoElement.Title="{DynamicResource ExternalNotificationGotifyToken}"
+                IsSafeEnabled="False"
+                ShowEyeButton="True"
+                UnsafePassword="{c:Binding GotifyToken}" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="11"
+            Orientation="Vertical"
+            Visibility="{c:Binding CustomWebhookEnabled}">
+            <hc:Divider Content="{DynamicResource ExternalNotificationCustomWebhook}" />
+            <StackPanel Orientation="Horizontal">
+                <hc:TextBox
+                    x:Name="CustomWebhookUrl"
+                    Width="400"
+                    Height="30"
+                    Margin="10,10,0,10"
+                    hc:InfoElement.Title="{DynamicResource ExternalNotificationCustomWebhookUrl}"
+                    Text="{c:Binding CustomWebhookUrl}" />
+                <!--  整个相同控件占位，保持控件长度一致  -->
+                <controls:TooltipBlock Visibility="Hidden" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <hc:TextBox
+                    x:Name="CustomWebhookBody"
+                    Width="400"
+                    MinHeight="20"
+                    Margin="10,10,0,10"
+                    hc:InfoElement.Placeholder="{DynamicResource ExternalNotificationCustomWebhookPlaceholders}"
+                    hc:InfoElement.Title="{DynamicResource ExternalNotificationCustomWebhookBody}"
+                    AcceptsReturn="True"
+                    GotFocus="{s:Action CustomWebhookBodyGotFocus}"
+                    LostFocus="{s:Action CustomWebhookBodyLostFocus}"
+                    Text="{c:Binding CustomWebhookBody}"
+                    TextWrapping="Wrap" />
+                <controls:TooltipBlock TooltipText="{DynamicResource ExternalNotificationCustomWebhookPlaceholders}" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

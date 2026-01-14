@@ -2,6 +2,7 @@
 order: 1
 icon: bxs:book
 ---
+
 # 集成文件
 
 ## 接口介紹
@@ -21,28 +22,28 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 #### 返回值
 
 - `AsstTaskId`  
-    若添加成功，返回該任務 ID，可用於後續設定任務參數；  
-    若添加失敗，返回 0
+   若添加成功，返回該任務 ID，可用於後續設定任務參數；  
+   若添加失敗，返回 0
 
 #### 參數說明
 
 - `AsstHandle handle`  
-    實例句柄
+   實例句柄
 - `const char* type`  
-    任務類型
+   任務類型
 - `const char* params`  
-    任務參數，json string
+   任務參數，json string
 
 ##### 任務類型一覽
 
 - `StartUp`  
-    開始喚醒  
+   開始喚醒
 
 ```json5
 // 對應的任務參數
 {
     "enable": bool,              // 是否啟用本任務，可選，預設為 true
-    "client_type": string,       // 用戶端版本，可選，預設為空
+    "client_type": string,       // 用戶端版本，必選
                                  // 選項："Official" | "Bilibili" | "txwy" | "YoStarEN" | "YoStarJP" | "YoStarKR"
     "start_game_enabled": bool,  // 是否自動啟動用戶端，可選，預設不啟動
     "account_name": string       // 切換賬號，可選，預設不切換
@@ -53,7 +54,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `CloseDown`  
-    關閉遊戲  
+   關閉遊戲
 
 ```json5
 // 對應的任務參數
@@ -65,7 +66,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Fight`  
-    刷理智
+   刷理智
 
 ```json5
 // 對應的任務參數
@@ -104,7 +105,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 另支援少部分資源關卡名請參考[集成範例](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/master/tools/AutoLocalization/example/zh-tw.xaml#L219)
 
 - `Recruit`  
-    公開招募
+   公開招募
 
 ```json5
 // 對應的任務參數
@@ -148,7 +149,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Infrast`  
-    基建換班
+   基建換班
 
 ```json5
 {
@@ -159,7 +160,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
                             // 20000 - Rotation: 一鍵輪換模式，會跳過控制中樞、發電站、宿舍以及辦公室，其餘設施不進行換班但保留基本操作（如使用無人機、會客室邏輯）
 
     "facility": [           // 要換班的設施（有序），必選。不支援執行中設定
-        string,             // 設施名，"Mfg" | "Trade" | "Power" | "Control" | "Reception" | "Office" | "Dorm"
+        string,             // 設施名，"Mfg" | "Trade" | "Power" | "Control" | "Reception" | "Office" | "Dorm" | "Processing" | "Training"
         ...
     ],
     "drones": string,       // 無人機用途，可選項，預設 _NotUse
@@ -170,8 +171,11 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
                             // mode = 20000 時該欄位無效（會被忽略）
     "replenish": bool,      // 貿易站 “源石碎片” 是否自動補貨，可選，預設 false
 
-    "dorm_notstationed_enabled": bool, // 是否啟用宿舍 “未進駐” 選項，可選，預設 false
-    "dorm_trust_enabled": bool, // 是否將宿舍剩餘位置填入信賴未滿幹員，可選，預設 false
+    "dorm_notstationed_enabled": bool, // 是否啟用宿舍 "未進駐" 選項，可選，預設 false
+    "dorm_trust_enabled": bool,        // 是否將宿舍剩餘位置填入信賴未滿幹員，可選，預設 false
+    "reception_message_board": bool,   // 是否領取會客室資訊板信用，可選，預設 true
+    "reception_clue_exchange": bool,   // 是否進行線索交流，可選，預設 true
+    "reception_send_clue": bool,       // 是否贈送線索，可選，預設 true
 
     /* 以下參數僅在 mode = 10000 時生效，否則會被忽略 */
     "filename": string,     // 自定義配置路徑，必選。不支援執行中設定
@@ -180,30 +184,34 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Mall`  
-    領取信用及商店購物。  
-    會先有序的按 `buy_first` 購買一遍，再從左到右並避開 `blacklist` 購買第二遍，在信用溢出時則會無視黑名單，從左到右購買第三遍直到不再溢出
+   領取信用及商店購物。  
+   會先有序的按 `buy_first` 購買一遍，再從左到右並避開 `blacklist` 購買第二遍，在信用溢出時則會無視黑名單，從左到右購買第三遍直到不再溢出
 
 ```json5
 // 對應的任務參數
 {
-    "enable": bool,         // 是否啟用本任務，可選，預設為 true
-    "shopping": bool,       // 是否購物，可選，預設 false。不支援執行中設定
-    "buy_first": [          // 優先購買列表，可選。不支援執行中設定
-        string,             // 商品名，如 "招聘許可"、"龍門幣" 等
-        ...
+    "enable": bool,         // 是否啟用此任務，可選，預設值 true
+    "visit_friends": bool,  // 是否造訪好友基建以獲得信用，可選，預設值 true
+    "shopping": bool,       // 是否購物，可選，預設值 true
+    "buy_first": [          // 優先購買清單，可選，預設值 []
+      string,               // 商品名稱，如 "招聘許可"、"龍門幣" 等
+      ...
     ],
-    "blacklist": [          // 黑名單列表，可選。不支援執行中設定
-        string,             // 商品名，如 "加急許可"、"家具零件" 等
-        ...
+    "blacklist": [          // 購物黑名單，可選，預設值 []
+      string,               // 商品名稱，如 "加急許可"、"家具零件" 等
+      ...
     ],
-   "force_shopping_if_credit_full": bool // 是否在信用溢出時無視黑名單，預設為 true
-    "only_buy_discount": bool // 是否只購買折扣物品，只作用於第二輪購買，預設為 false
-    "reserve_max_credit": boll // 是否在信用點低於300時停止購買，只作用於第二輪購買，預設為 false
+    "force_shopping_if_credit_full": bool,  // 信用點已滿時是否忽略黑名單進行購買，可選，預設值 false
+    "only_buy_discount": bool,              // 是否只購買折扣商品（僅在第二輪購買時生效），可選，預設值 false
+    "reserve_max_credit": bool,             // 當信用點低於 300 時是否停止購買（僅在第二輪購買時生效），可選，預設值 false
+    "credit_fight": bool,                   // 是否借助戰打一場 OF-1 關卡，以便隔日獲得更多信用，可選，預設值 false
+    "formation_index": int                  // 打 OF-1 時所使用的編隊欄位的索引。可選，預設值 0；
+                                            // 取值為 0–4 的整數，其中 0 表示選擇當前編隊，1-4 分別表示第一、二、三、四編隊
 }
 ```
 
 - `Award`  
-    領取日常獎勵
+   領取日常獎勵
 
 ```json5
 // 對應的任務參數
@@ -213,17 +221,18 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Roguelike`  
-    無限刷肉鴿
+   無限刷肉鴿
 
 ```json5
 // 對應的任務參數
 {
     "enable": bool,  // 是否啟用本任務，可選，預設值 true
     "theme": string, // 主題，可選，預設值 "Phantom"
-                     //   Phantom - 傀影與猩紅血鑽
-                     //   Mizuki  - 水月與深藍之樹
-                     //   Sami    - 探索者的銀霜止境
-                     //   Sarkaz  - 薩卡茲的無終奇語
+                     //   Phantom   - 傀影與猩紅血鑽
+                     //   Mizuki    - 水月與深藍之樹
+                     //   Sami      - 探索者的銀霜止境
+                     //   Sarkaz    - 薩卡茲的無終奇語
+                     //   JieGarden - 界园
     "mode": int,     // 模式，可選，預設值 0
                      //   0 - 刷分/獎勵點數，盡可能穩定地打更多層數
                      //   1 - 刷源石錠，第一層投資完就退出
@@ -256,7 +265,16 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
         string,                         // 僅當開局擁有列表中所有的密文板時才算凹開局成功；
         ...                             // 注意，此參數須與 “生活至上分隊” 同時使用，其他分隊在開局獎勵階段不會獲得密文板；
     ],
-    "start_with_two_ideas": bool,       // 是否凹 2 構想開局，可選，預設值 false；僅在主題為 Sarkaz 且模式為 4 時有效
+    "collectible_mode_start_list": {    // 開局期望的獎勵，可選，預設為全 false；僅在模式為 4 時有效
+        "hot_water": bool,              // 熱水壺獎勵，可觸發燒水機制（通用）
+        "shield": bool,                 // 護盾獎勵，相當於額外生命值（通用）
+        "ingot": bool,                  // 源石錠獎勵（通用）
+        "hope": bool,                   // 希望獎勵（通用，注意：JieGarden 主題中無 hope 獎勵）
+        "random": bool,                 // 隨機獎勵選項：指的是「消耗所有源石錠以換取一個隨機收藏品」（通用）
+        "key": bool,                    // 鑰匙獎勵，僅在 Mizuki 主題中有效
+        "dice": bool,                   // 骰子獎勵，僅在 Mizuki 主題中有效
+        "ideas": bool,                  // 2 构想獎勵，僅在 Sarkaz 主題中有效
+    },
     "use_foldartal": bool,                    // 是否使用密文板，模式 5 下預設值 false，其他模式下預設值 true；僅適用於 Sami 主題，
     "check_collapsal_paradigms": bool,        // 是否檢測獲取的坍縮範式，模式 5 下預設值 true，其他模式下預設值 false
     "double_check_collapsal_paradigms": bool, // 是否執行坍縮範式檢測防漏措施，模式 5 下預設值 true，其他模式下預設值 false；
@@ -269,20 +287,47 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Copilot`  
-    自動抄作業
+   自動抄作業
 
 ```json5
 {
-    "enable": bool,             // 是否啟用本任務，可選，預設為 true
-    "filename": string,         // 作業 JSON 的檔案路徑，絕對、相對路徑均可。不支援執行中設定
-    "formation": bool           // 是否進行 “快捷編隊”，可選，預設否。不支援執行中設定
+    "enable": bool,               // 是否啟用本任務，可選，預設值 true
+    "filename": string,           // 單一作業 JSON 文件的路徑，與 copilot_list 二選一（必填）；相對路徑與絕對路徑均可
+    "copilot_list": [             // 作業列表，與 filename 二選一（必填）；當 filename 與 copilot_list 同時存在時，忽視 copilot_list；此參數生效時僅可執行 set_params 一次
+        {
+            "filename": string,   // 作業 JSON 文件的路徑；相對路徑與絕對路徑均可
+            "stage_name": string, // 關卡名，具體請參考 [PRTS.Map](https://map.ark-nights.com)
+            "is_raid": bool       // 是否切換為突襲模式，可選, 預設值 false
+        },
+        ...
+    ],
+    "loop_times": int,            // 循環次數，可選，預設值 1；僅在單一作業模式下（即指定 filename 時）有效；此參數生效時僅可執行 set_params 一次
+    "use_sanity_potion": bool,    // 是否允許在剩餘理智不足時使用理智藥，可選，預設值 false
+    "formation": bool,            // 是否進行自動編隊，可選，預設值 false
+    "formation_index": int        // 自動編隊所使用的編隊欄位的編號，可選，預設值 0；僅在 formation 為 true 時有效；
+                                  // 為 0–4 的整數，其中 0 表示選擇當前編隊，1-4 分別表示第一、二、三、四編隊
+    "user_additional": [          // 自訂追加幹員列表，可選，預設值 []；僅在 formation 為 true 時有效
+        {
+            "name": string,       // 幹員名，可選，預設值 ""，若留空則忽視此幹員
+            "skill": int          // 需要攜帶的技能，可選，預設值 1；為 1–3 的整數，若不在此範圍內則遵從遊戲內預設的技能選擇
+        },
+        ...
+    ],
+    "add_trust": bool,            // 是否在自動編隊時以信賴值升序自動填充空餘欄位，可選，預設值 false；僅在 formation 為 true 時有效
+    "ignore_requirements": bool,  // 是否在自動編隊時忽視幹員屬性要求，可選，預設值 false；僅在 formation 為 true 時有效
+    "support_unit_usage": int,    // 助戰幹員的使用模式，可選，預設值 0；為 0–3 的整數，其中 support_unit_name；僅在 formation 為 true 時有效
+                                  //   0 - 表示不使用助戰幹員
+                                  //   1 - 如果有且僅有一名缺失幹員則嘗試尋找助戰幹員補齊編隊，如果無缺失幹員則不使用助戰幹員
+                                  //   2 - 如果有且僅有一名缺失幹員則嘗試尋找助戰幹員補齊編隊，如果無缺失幹員則使用指定助戰幹員
+                                  //   3 - 如果有且僅有一名缺失幹員則嘗試尋找助戰幹員補齊編隊，如果無缺失幹員則使用隨機助戰幹員
+    "support_unit_name": string   // 指定助戰幹員名，可選，預設值 ""；僅在 support_unit_usage 為 2 時有效
 }
 ```
 
 作業 JSON 請參考 [3.3-戰鬥流程協議](./copilot-schema.md)
 
 - `SSSCopilot`  
-    自動抄保全作業
+   自動抄保全作業
 
 ```json5
 {
@@ -294,8 +339,20 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 
 保全作業 JSON 請參考 [3.7-保全派駐協議](./sss-schema.md)
 
+- `ParadoxCopilot`
+  自動抄悖論模擬作業
+
+```json5
+// Task parameters
+{
+   "enable": bool,        // 是否啟用本任務，可選，預設為 true
+   "filename": string,    // 單一作業 JSON 的檔案路徑，絕對、相對路徑皆可。不支援運行期設定。必選，與 list 二選一
+   "list" : list<string>  // 作業 JSON 列表，絕對、相對路徑均可。不支援運行期設定。必選，與 filename 二選一
+}
+```
+
 - `Depot`  
-    倉庫辨識
+   倉庫辨識
 
 ```json5
 // 對應的任務參數
@@ -305,7 +362,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `OperBox`  
-    幹員 box 辨識
+   幹員 box 辨識
 
 ```json5
 // 對應的任務參數
@@ -315,7 +372,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 ```
 
 - `Reclamation`  
-    生息演算
+   生息演算
 
 ```json5
 {
@@ -330,7 +387,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
     "tools_to_craft": [
         string,                 // 自動製造的物品，可選項，默認為荧光棒
         ...
-    ] 
+    ],
                                 // 建議填寫子串
     "increment_mode": int,      // 點擊類型，可選項。默認為0
                                 // 0 - 連點
@@ -339,7 +396,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 }
 ```
 
-- `Custom`  
+- `Custom`
 
   自定義任務
 
@@ -354,7 +411,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 }
 ```
 
-- `SingleStep`  
+- `SingleStep`
 
   單步任務（目前僅支援戰鬥）
 
@@ -373,7 +430,7 @@ AsstTaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const cha
 }
 ```
 
-- `VideoRecognition`  
+- `VideoRecognition`
 
   影片辨識，目前僅支援作業（作戰）影片
 
@@ -399,17 +456,17 @@ bool ASSTAPI AsstSetTaskParams(AsstHandle handle, AsstTaskId id, const char* par
 #### 返回值
 
 - `bool`  
-    返回是否設定成功
+   返回是否設定成功
 
 #### 參數說明
 
 - `AsstHandle handle`  
-    實例句柄
+   實例句柄
 - `AsstTaskId task`  
-    任務 ID, `AsstAppendTask` 接口的返回值
+   任務 ID, `AsstAppendTask` 接口的返回值
 - `const char* params`  
-    任務參數，json string，與 `AsstAppendTask` 接口相同。  
-    未標注 “不支援執行中設定” 的欄位都支援實時修改；否則若當前任務正在執行，會忽略對應的欄位
+   任務參數，json string，與 `AsstAppendTask` 接口相同。  
+   未標注 “不支援執行中設定” 的欄位都支援實時修改；否則若當前任務正在執行，會忽略對應的欄位
 
 ### `AsstSetStaticOption`
 
@@ -426,14 +483,14 @@ bool ASSTAPI AsstSetStaticOption(AsstStaticOptionKey key, const char* value);
 #### 返回值
 
 - `bool`  
-    返回是否設定成功
+   返回是否設定成功
 
 #### 參數說明
 
 - `AsstStaticOptionKey key`  
-    鍵
+   鍵
 - `const char* value`  
-    值
+   值
 
 ##### 鍵值一覽
 
@@ -454,16 +511,16 @@ bool ASSTAPI AsstSetInstanceOption(AsstHandle handle, AsstInstanceOptionKey key,
 #### 返回值
 
 - `bool`  
-    返回是否設定成功
+   返回是否設定成功
 
 #### 參數說明
 
 - `AsstHandle handle`  
-    實例句柄
+   實例句柄
 - `AsstInstanceOptionKey key`  
-    鍵
+   鍵
 - `const char* value`  
-    值
+   值
 
 ##### 鍵值一覽
 

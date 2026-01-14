@@ -1,6 +1,6 @@
 // <copyright file="RemoteControlUserControlModel.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -12,6 +12,7 @@
 // </copyright>
 
 #nullable enable
+using System;
 using MaaWpfGui.Constants;
 using MaaWpfGui.Helper;
 using Stylet;
@@ -35,8 +36,7 @@ public class RemoteControlUserControlModel : PropertyChangedBase
     public string RemoteControlGetTaskEndpointUri
     {
         get => _remoteControlGetTaskEndpointUri;
-        set
-        {
+        set {
             if (!SetAndNotify(ref _remoteControlGetTaskEndpointUri, value))
             {
                 return;
@@ -53,8 +53,7 @@ public class RemoteControlUserControlModel : PropertyChangedBase
     public string RemoteControlReportStatusUri
     {
         get => _remoteControlReportStatusUri;
-        set
-        {
+        set {
             SetAndNotify(ref _remoteControlReportStatusUri, value);
             value = SimpleEncryptionHelper.Encrypt(value);
             ConfigurationHelper.SetValue(ConfigurationKeys.RemoteControlReportStatusUri, value);
@@ -66,8 +65,7 @@ public class RemoteControlUserControlModel : PropertyChangedBase
     public string RemoteControlUserIdentity
     {
         get => _remoteControlUserIdentity;
-        set
-        {
+        set {
             SetAndNotify(ref _remoteControlUserIdentity, value);
             value = SimpleEncryptionHelper.Encrypt(value);
             ConfigurationHelper.SetValue(ConfigurationKeys.RemoteControlUserIdentity, value);
@@ -79,11 +77,25 @@ public class RemoteControlUserControlModel : PropertyChangedBase
     public string RemoteControlDeviceIdentity
     {
         get => _remoteControlDeviceIdentity;
-        set
-        {
+        set {
             SetAndNotify(ref _remoteControlDeviceIdentity, value);
             value = SimpleEncryptionHelper.Encrypt(value);
             ConfigurationHelper.SetValue(ConfigurationKeys.RemoteControlDeviceIdentity, value);
+        }
+    }
+
+    private int _remoteControlPollIntervalMs = Convert.ToInt32(ConfigurationHelper.GetValue(ConfigurationKeys.RemoteControlPollIntervalMs, "1000"));
+
+    public int RemoteControlPollIntervalMs
+    {
+        get => _remoteControlPollIntervalMs;
+        set {
+            if (!SetAndNotify(ref _remoteControlPollIntervalMs, value))
+            {
+                return;
+            }
+
+            ConfigurationHelper.SetValue(ConfigurationKeys.RemoteControlPollIntervalMs, value.ToString());
         }
     }
 }

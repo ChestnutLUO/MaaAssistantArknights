@@ -77,7 +77,7 @@ MAA Team 允许用户通过 MAA 获得收益，但**存在额外限制**：
 
 1. 用户必须明确声明其与 MAA Team 的关系；
 2. 用户必须明确声明自身是否正在使用 MAA；
-3. 用户必须**无偿**提供属于 MAA Team 的第一手资料（包括但不限于 [MAA GitHub 仓库地址](https://github.com/MaaAssistantArknights/MaaAssistantArknights/)、[MAA 官网](https://maa.plus/)、[MAA 文档站](https://maa.plus/docs/)等）。
+3. 用户必须**无偿**提供属于 MAA Team 的第一手资料（包括但不限于 [MAA GitHub 仓库地址](https://github.com/MaaAssistantArknights/MaaAssistantArknights/)、[MAA 官网](https://maa.plus/)、[MAA 文档站](https://docs.maa.plus/)等）。
 
 在满足上述前提条件之后，用户方可有偿提供如使用教学、疑难解答、内容分发、远程控制、代理运行等额外服务。
 
@@ -101,7 +101,7 @@ MAA 的数据加密密钥来源于用户的本地计算机用户凭证，加密�
 
 ### 4.3 数据上传
 
-默认情况下，MAA **会**启用数据上报功能，将“自动公招”和“刷理智”相关数据**以匿名形式**提交至：
+默认情况下，MAA **会**启用数据上报功能，将“自动公招”和“理智作战”相关数据**以匿名形式**提交至：
 
 - [企鹅物流数据统计](https://penguin-stats.cn/)
 - [明日方舟一图流](https://ark.yituliu.cn/)

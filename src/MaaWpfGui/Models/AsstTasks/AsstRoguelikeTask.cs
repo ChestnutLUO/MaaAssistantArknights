@@ -1,6 +1,6 @@
 // <copyright file="AsstRoguelikeTask.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -13,8 +13,8 @@
 
 #nullable enable
 using System.Collections.Generic;
+using MaaWpfGui.Configuration.Single.MaaTask;
 using MaaWpfGui.Services;
-using MaaWpfGui.ViewModels.UserControl.TaskQueue;
 using Newtonsoft.Json.Linq;
 
 namespace MaaWpfGui.Models.AsstTasks;
@@ -47,7 +47,7 @@ public class AsstRoguelikeTask : AsstBaseTask
     ///     </item>
     /// </list>
     /// </summary>
-    public int Mode { get; set; }
+    public RoguelikeMode Mode { get; set; }
 
     /// <summary>
     /// Gets or sets 刷投资的目标难度/其他模式的选择难度
@@ -180,6 +180,11 @@ public class AsstRoguelikeTask : AsstBaseTask
     public bool DeepExplorationAutoIterate { get; set; }
 
     /// <summary>
+    /// Gets or sets FindPlaytime 模式的目标常乐节点子类型
+    /// </summary>
+    public RoguelikeBoskySubNodeType FindPlaytimeTarget { get; set; } = RoguelikeBoskySubNodeType.Ling;
+
+    /// <summary>
     /// Gets or sets a value indicating whether 是否在五层BOSS前停下来
     /// </summary>
     public bool StopAtFinalBoss { get; set; }
@@ -198,16 +203,12 @@ public class AsstRoguelikeTask : AsstBaseTask
     {
         var taskParams = new JObject
         {
-            ["mode"] = Mode,
+            ["mode"] = (int)Mode,
             ["theme"] = Theme.ToString(),
+            ["difficulty"] = Difficulty,
             ["starts_count"] = Starts,
             ["investment_enabled"] = InvestmentEnabled,
         };
-
-        if (Theme != RoguelikeTheme.Phantom)
-        {
-            taskParams["difficulty"] = Difficulty;
-        }
 
         if (InvestmentEnabled)
         {
@@ -231,12 +232,12 @@ public class AsstRoguelikeTask : AsstBaseTask
             taskParams["core_char"] = CoreChar;
         }
 
-        if (Mode == 0)
+        if (Mode == RoguelikeMode.Exp)
         {
             taskParams["stop_at_final_boss"] = StopAtFinalBoss;
             taskParams["stop_at_max_level"] = StopAtMaxLevel;
         }
-        else if (Mode == 4)
+        else if (Mode == RoguelikeMode.Collectible)
         {
             // 刷开局模式
             taskParams["collectible_mode_shopping"] = CollectibleModeShopping;
@@ -246,15 +247,20 @@ public class AsstRoguelikeTask : AsstBaseTask
             taskParams["collectible_mode_start_list"] = JObject.FromObject(CollectibleModeStartRewards);
         }
 
-        if (Mode == 6)
+        if (Mode == RoguelikeMode.Squad)
         {
             taskParams["monthly_squad_auto_iterate"] = MonthlySquadAutoIterate;
             taskParams["monthly_squad_check_comms"] = MonthlySquadCheckComms;
         }
 
-        if (Mode == 7)
+        if (Mode == RoguelikeMode.Exploration)
         {
             taskParams["deep_exploration_auto_iterate"] = DeepExplorationAutoIterate;
+        }
+
+        if (Mode == RoguelikeMode.FindPlaytime)
+        {
+            taskParams["find_playTime_target"] = (int)FindPlaytimeTarget;
         }
 
         if (SamiFirstFloorFoldartal && SamiStartFloorFoldartal.Length > 0)
@@ -267,7 +273,7 @@ public class AsstRoguelikeTask : AsstBaseTask
             taskParams["start_foldartal_list"] = JArray.FromObject(SamiNewSquad2StartingFoldartals);
         }
 
-        if (Mode == 5 && ExpectedCollapsalParadigms.Count > 0)
+        if (Mode == RoguelikeMode.CLP_PDS && ExpectedCollapsalParadigms.Count > 0)
         {
             taskParams["expected_collapsal_paradigms"] = JArray.FromObject(ExpectedCollapsalParadigms);
         }

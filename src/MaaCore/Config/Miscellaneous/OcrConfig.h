@@ -2,9 +2,9 @@
 
 #include "Config/AbstractConfig.h"
 
-#include "Utils/Ranges.hpp"
 #include <algorithm>
 #include <numeric>
+#include <ranges>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -13,7 +13,7 @@
 
 namespace asst
 {
-class OcrConfig final : public SingletonHolder<OcrConfig>, public AbstractConfig
+class OcrConfig final : public MAA_NS::SingletonHolder<OcrConfig>, public AbstractConfig
 {
 public:
     virtual ~OcrConfig() override = default;

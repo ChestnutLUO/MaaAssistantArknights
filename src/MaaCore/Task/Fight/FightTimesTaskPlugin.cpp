@@ -3,8 +3,10 @@
 #include "Config/GeneralConfig.h"
 #include "Config/TaskData.h"
 #include "Controller/Controller.h"
+#include "MaaUtils/ImageIo.h"
+#include "MaaUtils/NoWarningCV.hpp"
 #include "Task/ProcessTask.h"
-#include "Utils/NoWarningCV.h"
+#include "Utils/DebugImageHelper.hpp"
 #include "Vision/Matcher.h"
 #include "Vision/MultiMatcher.h"
 #include "Vision/RegionOCRer.h"
@@ -16,7 +18,7 @@ bool asst::FightTimesTaskPlugin::verify(AsstMsg msg, const json::value& details)
     }
 
     const std::string task = details.get("details", "task", "");
-    if (task.ends_with("MedicineConfirm") || task.ends_with("StoneConfirm")) {
+    if (/* task.ends_with("MedicineConfirm") 走插件调用 */ task.ends_with("StoneConfirm")) {
         m_has_used_medicine = true;
     }
     else if (task.ends_with("StartButton2")) {
@@ -25,7 +27,7 @@ bool asst::FightTimesTaskPlugin::verify(AsstMsg msg, const json::value& details)
     else if (task.ends_with("CloseStonePage")) {
         m_is_medicine_exhausted = true;
     }
-    else if (task.ends_with("Fight@EndOfAction") || task.ends_with("Fight@EndOfActionAnnihilation")) {
+    else if (task.ends_with("EndOfAction") || task.ends_with("EndOfActionAnnihilation")) {
         m_fight_times += m_series_current;
     }
     else if (task.ends_with("StartButton1")) {
@@ -43,7 +45,7 @@ bool asst::FightTimesTaskPlugin::_run()
     LogTraceFunction;
     json::value sanity_info = basic_info_with_what("SanityBeforeStage");
     json::value fight = basic_info_with_what("FightTimes");
-    sanity_info["details"]["report_time"] = utils::get_format_time();
+    sanity_info["details"]["report_time"] = MAA_NS::format_now();
     // {"sanity_current": 100, "sanity_max": 135, "report_time": "2023-09-01 09:31:53.527"}
     auto image = ctrler()->get_image();
     auto sanity = analyze_sanity_remain(image);
@@ -61,6 +63,7 @@ bool asst::FightTimesTaskPlugin::_run()
     if (m_fight_times >= m_fight_times_max) {
         m_task_ptr->set_enable(false); // 战斗次数已达上限
         Log.info(__FUNCTION__, "fight times reached max");
+        fight["details"]["finished"] = true;
         callback(AsstMsg::SubTaskExtraInfo, fight);
         return true;
     }
@@ -104,24 +107,35 @@ bool asst::FightTimesTaskPlugin::_run()
         }
     }
 
-    if (m_fight_times + *series > m_fight_times_max) {
-        m_task_ptr->set_enable(false); // 战斗次数超过上限
-        Log.info(__FUNCTION__, "fight times reached max");
-        callback(AsstMsg::SubTaskExtraInfo, fight);
-        return true;
-    }
-
     // 连续战斗次数+当前战斗次数 <= 最大战斗次数
     m_series_current = *series;
     fight["details"]["series"] = *series;
     fight["details"]["sanity_cost"] = *sanity_cost;
+
+    if (m_fight_times + *series > m_fight_times_max) {
+        m_task_ptr->set_enable(false); // 战斗次数超过上限
+        Log.info(__FUNCTION__, "fight times reached max");
+        fight["details"]["finished"] = true;
+    }
     callback(AsstMsg::SubTaskExtraInfo, fight);
     return true;
 }
 
 bool asst::FightTimesTaskPlugin::open_series_list(const cv::Mat& image)
 {
-    return ProcessTask(*this, { "FightSeries-Opened", "FightSeries-Open" }).set_reusable_image(image).run();
+    if (!ProcessTask(*this, { "FightSeries-Opened", "FightSeries-Open" })
+             .set_reusable_image(image)
+             .set_retry_times(10)
+             .run()) {
+        Log.error(__FUNCTION__, "unable to open series list");
+        const auto relative_dir = utils::path("debug") / utils::path("fightSeries");
+        utils::save_debug_image(image, relative_dir, true, "reusable image");
+        utils::save_debug_image(ctrler()->get_image(), relative_dir, true, "current screenshot");
+
+        return false;
+    }
+
+    return true;
 }
 
 void asst::FightTimesTaskPlugin::close_series_list(const cv::Mat& image)
@@ -134,29 +148,31 @@ std::optional<int> asst::FightTimesTaskPlugin::change_series(int sanity_current,
     int fight_times_remain = std::min(m_fight_times_max - m_fight_times, 6);
     if (!m_has_used_medicine && !m_is_medicine_exhausted) {
         if (fight_times_remain != series) {
-            // 调整到剩余次数
-            return select_series(false);
+            return select_series(false); // 调整到剩余次数
         }
         return series;
     }
 
-    // 用过药品, 认为已选择最大可用次数
-    if (m_has_used_medicine && sanity_cost <= sanity_current) { // 吃药前一般选择最大可用次数, 吃完药已经够理智了
-        return series;
+    if (m_has_used_medicine) {               // 用过药品, 认为已选择最大可用次数
+        if (sanity_cost <= sanity_current) { // 吃药前一般选择最大可用次数, 吃完药已经够理智了
+            return series;
+        }
+        // 吃药后理智超限, 减少了吃药量, 选择剩余次数
     }
 
     auto ret = select_series(true);
-    if (!ret && m_is_medicine_exhausted) { // 药品用完, 且没有次数可用, 刷理智结束
+    if (!ret && m_is_medicine_exhausted) { // 药品用完, 且没有次数可用, 理智作战结束
         m_task_ptr->set_enable(false);
     }
-
+    else if (!ret) {
+        ret = select_series(1);
+    }
     return ret;
 }
 
 std::optional<int> asst::FightTimesTaskPlugin::select_series(bool available_only)
 {
     if (!open_series_list()) {
-        Log.error(__FUNCTION__, "unable to open series list");
         return std::nullopt;
     }
     int fight_times_remain = std::min(m_fight_times_max - m_fight_times, 6);
@@ -179,17 +195,16 @@ std::optional<int> asst::FightTimesTaskPlugin::select_series(bool available_only
         }
     }
     close_series_list();
-    Log.error(__FUNCTION__, "no available series found");
+    LogInfo << __FUNCTION__ << "no available series found";
     return std::nullopt;
 }
 
 bool asst::FightTimesTaskPlugin::select_series(int times)
 {
     if (!open_series_list()) {
-        Log.error(__FUNCTION__, "unable to open series list");
         return false;
     }
-    int fight_times_remain = std::min(m_fight_times_max - m_fight_times, times);
+
     auto image = ctrler()->get_image();
     auto list = analyze_series_list(image);
     if (list.empty()) {
@@ -198,7 +213,7 @@ bool asst::FightTimesTaskPlugin::select_series(int times)
         return false;
     }
     for (const auto& item : list) {
-        if (item.times == fight_times_remain) {
+        if (item.times == times) {
             ctrler()->click(item.rect);
             sleep(Config.get_options().task_delay);
             return true;
@@ -269,7 +284,7 @@ std::vector<asst::FightSeriesListItem> asst::FightTimesTaskPlugin::analyze_serie
             }
         }*/
     }
-    // ranges::reverse(list);
+    // std::ranges::reverse(list);
     return list;
 }
 
@@ -277,7 +292,6 @@ std::optional<asst::SanityResult> asst::FightTimesTaskPlugin::analyze_sanity_rem
 {
     RegionOCRer analyzer(image);
     analyzer.set_task_info("SanityMatch");
-    analyzer.set_bin_threshold(0, 255);
     auto res_opt = analyzer.analyze();
 
     if (!res_opt) [[unlikely]] {
@@ -318,6 +332,7 @@ std::optional<int> asst::FightTimesTaskPlugin::analyze_stage_series(const cv::Ma
     LogTraceFunction;
     const auto& task = Task.get("FightSeries-Icon");
 
+    cv::normalize(image, image, 0, 255, cv::NORM_MINMAX);
     Matcher match(image);
     match.set_task_info(task);
     if (!match.analyze()) {
@@ -353,7 +368,7 @@ std::optional<int> asst::FightTimesTaskPlugin::analyze_sanity_cost(const cv::Mat
     const auto& number_replace = Task.get<OcrTaskInfo>("NumberOcrReplace")->replace_map;
     auto task_replace = ocr_task->replace_map;
     auto merge_map = std::vector(number_replace);
-    ranges::copy(task_replace, std::back_inserter(merge_map));
+    std::ranges::copy(task_replace, std::back_inserter(merge_map));
 
     Matcher match(image);
     match.set_task_info("StageSanityCost");
@@ -365,7 +380,6 @@ std::optional<int> asst::FightTimesTaskPlugin::analyze_sanity_cost(const cv::Mat
     RegionOCRer analyzer(image);
     analyzer.set_task_info(ocr_task);
     analyzer.set_roi(match.get_result().rect.move(ocr_task->roi));
-    analyzer.set_bin_threshold(0, 255);
     analyzer.set_replace(merge_map);
 
     if (!analyzer.analyze()) [[unlikely]] {

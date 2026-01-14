@@ -1,24 +1,23 @@
 name: Bug Report (in English)
-description: >-
-  Recognition errors, operation abnormalities,
-  connection errors, etc.
+description: Recognition errors, operation abnormalities, connection errors, etc.
 labels: ["bug"]
 body:
   - type: checkboxes
     id: checks
     attributes:
-      label: Before raising the issue...
-      description: |
-        Please ensure that you have completed the requirements before checking the box.  
-        Issues with the checkbox checked but not completed will be directly closed.
+      label: |
+        Please ensure that you have completed the required items before checking the boxes.
+        Issues with incomplete required items or with the 'I did not read carefully' option checked will be considered voluntary acceptance of direct closure.
       options:
         - label: I understand that Issues are for feedback and problem solving, not trolling the comments section, and will provide as much information as possible to help solve the problem.
           required: true
         - label: I filled in a short, clear title so that developers could quickly identify the general problem when going through the issue list. Instead of "Some suggestions", "Stuck", etc.
           required: true
-        - label: I am using the latest version of the current update version and have reviewed both the [Unreleased changes](https://github.com/MaaAssistantArknights/MaaAssistantArknights/commits/dev/) and there is no mention of the bug being fixed.
+        - label: I am using the latest version of the current update version, and have reviewed the [update content](https://github.com/MaaAssistantArknights/MaaAssistantArknights/commits/dev/) released to date, [Pull Requests](https://github.com/MaaAssistantArknights/MaaAssistantArknights/pulls) unreleased update content and there is no mention of the bug being fixed.
           required: true
-        - label: I have reviewed the [FAQs](https://maa.plus/docs/en-us/manual/faq.html), [Announcement](/MaaAssistantArknights/MaaAssistantArknights/issues/7732), [Open Issue](https://github.com/MaaAssistantArknights/MaaAssistantArknights/issues), [Closed Issue](https://github.com/MaaAssistantArknights/MaaAssistantArknights/issues?q=is%3Aissue%20state%3Aclosed) to ensure that my issue/bug has not been mentioned.
+        - label: I have checked all the options without carefully reading the content and believe this will not affect issue resolution.
+          required: false
+        - label: I have reviewed the [FAQs](https://docs.maa.plus/en-us/manual/faq.html), [Announcement](/MaaAssistantArknights/MaaAssistantArknights/issues/7732), [Open Issues](https://github.com/MaaAssistantArknights/MaaAssistantArknights/issues), [Closed Issues](https://github.com/MaaAssistantArknights/MaaAssistantArknights/issues?q=is%3Aissue%20state%3Aclosed) to ensure that my issue has not been mentioned.
           required: true
   - type: textarea
     id: describe
@@ -43,12 +42,10 @@ body:
     id: logs
     attributes:
       label: Log and config files
-      description: >-
-        **Please locate the Generate Support Payload button under MAA Settings -> Issue Report, click the button, and upload the generated zip file**
-
-        **Please drag and drop the full file in, not your own cuttings or copies; compress it before uploading if too large.**
-
-        If you are using MacBook, please click the "File" option in the top-left corner of the screen, then click "Open Log Folder".
+      description: |
+        **Please locate the Generate Support Payload button under MAA Settings -> Issue Report, click the button, and upload the generated zip file**  
+        **If the archive to upload is larger than 25MB, please upload smaller archives from the same date folder instead.**  
+        If you are using macOS, please click the "File" option in the top-left corner of the screen, then click "Open Log Folder".
       placeholder: |
         Please confirm that MAA is not running before uploading files.
     validations:
@@ -58,8 +55,8 @@ body:
     attributes:
       label: Configuration information
       description: |
-        Please specify the operating system and version, emulator brand, emulator resolution, DPI, and frame rate;
-        If you are using MuMu 12 or LDPlayer 9, please specify whether Screenshot Enhancement is enabled;
+        Please specify the operating system and version, emulator brand, emulator resolution, DPI, and frame rate.  
+        If you are using MuMu or LDPlayer 9, please specify whether Screenshot Enhancement is enabled.  
         Finally, please specify whether GPU accelerated inference is enabled, and if so, provide the GPU model.
     validations:
       required: true
@@ -67,31 +64,23 @@ body:
     id: screenshots
     attributes:
       label: Screenshots or recordings
-      description: >-
-        In the `debug` directory, within the functionally categorized folders, 
-        there are some error images captured automatically.
-        If related to this issue, please upload them together.
-
+      description: |
         If available, upload screenshots and recordings to help explain your problem,
         including but not limited to screenshots of MAA software,
-        screenshots of game screens.
-
+        screenshots of game screens.  
         If the problem is **recognition related**, please help by providing
         the **original image** taken by the emulator's own screenshot tool
-        (or via adb).
-
+        (or via adb).  
         Screenshots taken with other tools may contain the frames of the window/emulator
         and their aspect ratio and resolution are inconsistent,
-        which makes it harder for us to debug.
-
-        If the file siz is too large, you may compress it before uploading.
-
+        which makes it harder for us to debug.  
+        If the file size is too large, you may compress it before uploading.
     validations:
       required: false
   - type: textarea
     id: others
     attributes:
-      label: Anthing else?
+      label: Anything else?
       description: |
         Anything that will give us more insight into the problem you are having.
     validations:

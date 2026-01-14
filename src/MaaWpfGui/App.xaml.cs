@@ -1,6 +1,6 @@
 // <copyright file="App.xaml.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -18,37 +18,36 @@ using MaaWpfGui.WineCompat;
 using MaaWpfGui.WineCompat.FontConfig;
 using Serilog;
 
-namespace MaaWpfGui
+namespace MaaWpfGui;
+
+/// <summary>
+/// App.xaml 的交互逻辑
+/// </summary>
+public partial class App : Application
 {
-    /// <summary>
-    /// App.xaml 的交互逻辑
-    /// </summary>
-    public partial class App : Application
+    private static readonly ILogger _logger = Log.ForContext<App>();
+
+    public void Hyperlink_Click(object sender, RoutedEventArgs e)
     {
-        private static readonly ILogger _logger = Log.ForContext<App>();
-
-        public void Hyperlink_Click(object sender, RoutedEventArgs e)
+        Hyperlink link = sender as Hyperlink;
+        if (!string.IsNullOrEmpty(link?.NavigateUri?.AbsoluteUri))
         {
-            Hyperlink link = sender as Hyperlink;
-            if (!string.IsNullOrEmpty(link?.NavigateUri?.AbsoluteUri))
+            Process.Start(new ProcessStartInfo
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = link.NavigateUri.AbsoluteUri,
-                    UseShellExecute = true,
-                });
-            }
+                FileName = link.NavigateUri.AbsoluteUri,
+                UseShellExecute = true,
+            });
+        }
+    }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        if (WineRuntimeInformation.IsRunningUnderWine && MaaDesktopIntegration.Available)
+        {
+            // override buintin font map as early as possible
+            FontConfigIntegration.Install();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            if (WineRuntimeInformation.IsRunningUnderWine && MaaDesktopIntegration.Availabile)
-            {
-                // override buintin font map as early as possible
-                FontConfigIntegration.Install();
-            }
-
-            base.OnStartup(e);
-        }
+        base.OnStartup(e);
     }
 }

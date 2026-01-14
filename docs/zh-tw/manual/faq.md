@@ -1,5 +1,5 @@
 ---
-order: 4
+order: 2
 icon: ph:question-fill
 ---
 
@@ -15,13 +15,13 @@ icon: ph:question-fill
 請運行 MAA 目錄下的 `DependencySetup_依赖库安装.bat`，或者在終端中運行以下命令，
 
 ```sh
-winget install "Microsoft.VCRedist.2015+.x64" --override "/repair /passive /norestart" --force --uninstall-previous --accept-package-agreements && winget install "Microsoft.DotNet.DesktopRuntime.8" --override "/repair /passive /norestart" --force --uninstall-previous --accept-package-agreements
+winget install "Microsoft.VCRedist.2015+.x64" --override "/repair /passive /norestart" --force --uninstall-previous --accept-package-agreements && winget install "Microsoft.DotNet.DesktopRuntime.10" --override "/repair /passive /norestart" --force --uninstall-previous --accept-package-agreements
 ```
 
 或者手動下載並安裝以下<u>**兩個**</u>運行庫來解決問題。
 
-- [Visual C++ 可再發行程序包](https://aka.ms/vs/17/release/vc_redist.x64.exe)
-- [.NET 桌面運行時 8](https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe)
+- [Visual C++ 可再發行程序包](https://aka.ms/vc14/vc_redist.x64.exe)
+- [.NET 桌面運行時 10](https://aka.ms/dotnet/10.0/windowsdesktop-runtime-win-x64.exe)
 
 :::
 
@@ -51,15 +51,15 @@ winget install "Microsoft.VCRedist.2015+.x64" --override "/repair /passive /nore
 
 #### Windows 7
 
-.NET 8 不支持 Windows 7 / 8 / 8.1 系統<sup>[源](https://github.com/dotnet/core/issues/7556)</sup>，所以 MAA 也同樣不再支持。最後一個可用的 .NET 8 版本為 [`v5.4.0-beta.1.d035.gd2e5001e7`](https://github.com/MaaAssistantArknights/MaaRelease/releases/tag/v5.4.0-beta.1.d035.gd2e5001e7)；最後一個可用的 .NET 4.8 版本為 [`v4.28.8`](https://github.com/MaaAssistantArknights/MaaAssistantArknights/releases/tag/v4.28.8)。尚未確定自行編譯的可行性。
+.NET 10 不支持 Windows 7 / 8 / 8.1 系統<sup>[源](https://github.com/dotnet/core/issues/7556)</sup>，所以 MAA 也同樣不再支持。最後一個可用的 .NET 8 版本為 [`v5.4.0-beta.1.d035.gd2e5001e7`](https://github.com/MaaAssistantArknights/MaaRelease/releases/tag/v5.4.0-beta.1.d035.gd2e5001e7)；最後一個可用的 .NET 4.8 版本為 [`v4.28.8`](https://github.com/MaaAssistantArknights/MaaAssistantArknights/releases/tag/v4.28.8)。尚未確定自行編譯的可行性。
 
 對於 Windows 7，在安裝上文提到的兩個運行庫之前，還需檢查以下補丁是否已安裝：
 
-  1. [Windows 7 Service Pack 1](https://support.microsoft.com/zh-cn/windows/b3da2c0f-cdb6-0572-8596-bab972897f61)
-  2. SHA-2 代碼簽名修補程式：
-     - KB4474419：[下載連結 1](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2019/09/windows6.1-kb4474419-v3-x64_b5614c6cea5cb4e198717789633dca16308ef79c.msu)、[下載連結 2](http://download.windowsupdate.com/c/msdownload/update/software/secu/2019/09/windows6.1-kb4474419-v3-x64_b5614c6cea5cb4e198717789633dca16308ef79c.msu)
-     - KB4490628：[下載連結 1](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2019/03/windows6.1-kb4490628-x64_d3de52d6987f7c8bdc2c015dca69eac96047c76e.msu)、[下載連結 2](http://download.windowsupdate.com/c/msdownload/update/software/secu/2019/03/windows6.1-kb4490628-x64_d3de52d6987f7c8bdc2c015dca69eac96047c76e.msu)
-  3. Platform Update for Windows 7（DXGI 1.2、Direct3D 11.1，KB2670838）：[下載連結 1](https://catalog.s.download.windowsupdate.com/msdownload/update/software/ftpk/2013/02/windows6.1-kb2670838-x64_9f667ff60e80b64cbed2774681302baeaf0fc6a6.msu)、[下載連結 2](http://download.windowsupdate.com/msdownload/update/software/ftpk/2013/02/windows6.1-kb2670838-x64_9f667ff60e80b64cbed2774681302baeaf0fc6a6.msu)
+1. [Windows 7 Service Pack 1](https://support.microsoft.com/zh-tw/windows/b3da2c0f-cdb6-0572-8596-bab972897f61)
+2. SHA-2 代碼簽名修補程式：
+   - KB4474419：[下載連結 1](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2019/09/windows6.1-kb4474419-v3-x64_b5614c6cea5cb4e198717789633dca16308ef79c.msu)、[下載連結 2](http://download.windowsupdate.com/c/msdownload/update/software/secu/2019/09/windows6.1-kb4474419-v3-x64_b5614c6cea5cb4e198717789633dca16308ef79c.msu)
+   - KB4490628：[下載連結 1](https://catalog.s.download.windowsupdate.com/c/msdownload/update/software/secu/2019/03/windows6.1-kb4490628-x64_d3de52d6987f7c8bdc2c015dca69eac96047c76e.msu)、[下載連結 2](http://download.windowsupdate.com/c/msdownload/update/software/secu/2019/03/windows6.1-kb4490628-x64_d3de52d6987f7c8bdc2c015dca69eac96047c76e.msu)
+3. Platform Update for Windows 7（DXGI 1.2、Direct3D 11.1，KB2670838）：[下載連結 1](https://catalog.s.download.windowsupdate.com/msdownload/update/software/ftpk/2013/02/windows6.1-kb2670838-x64_9f667ff60e80b64cbed2774681302baeaf0fc6a6.msu)、[下載連結 2](http://download.windowsupdate.com/msdownload/update/software/ftpk/2013/02/windows6.1-kb2670838-x64_9f667ff60e80b64cbed2774681302baeaf0fc6a6.msu)
 
 ##### .NET 8 應用在 Windows 7 上運行異常的緩解措施 [#8238](https://github.com/MaaAssistantArknights/MaaAssistantArknights/issues/8238)
 
@@ -88,21 +88,20 @@ winget install "Microsoft.VCRedist.2015+.x64" --override "/repair /passive /nore
 
   針對模擬器單開情況，參考各個模擬器文件和網易遊戲高級遊戲開發工程師@趙青青的[博客](https://www.cnblogs.com/zhaoqingqing/p/15238464.html)，常見安卓模擬器的 adb 通訊埠如下：
 
-    |模擬器|主模擬器預設通訊埠|
-    |-|:-:|
-    |網易 MuMu 模擬器 6/X|7555|
-    |網易 MuMu 模擬器 12|16384|
-    |夜神安卓模擬器|62001|
-    |逍遙安卓模擬器|21503|
-    |藍疊安卓模擬器|5555|
-    |雷電安卓模擬器 9|5555 / emulator-5554|
+  | 模擬器               |  主模擬器預設通訊埠  |
+  | -------------------- | :------------------: |
+  | 網易 MuMu 模擬器 6/X |         7555         |
+  | 網易 MuMu 模擬器 12  |        16384         |
+  | 夜神安卓模擬器       |        62001         |
+  | 逍遙安卓模擬器       |        21503         |
+  | 藍疊安卓模擬器       |         5555         |
+  | 雷電安卓模擬器 9     | 5555 / emulator-5554 |
 
-    純數字的預設通訊埠可以直接使用 `127.0.0.1:[port]` 來連接，雷電模擬器進行了封裝，也可以使用 `emulator-5554` 進行連接。
+  純數字的預設通訊埠可以直接使用 `127.0.0.1:[port]` 來連接，雷電模擬器進行了封裝，也可以使用 `emulator-5554` 進行連接。
 
-    在 Windows 與 Mac 的 `設定` - `連接設定` - `連接地址` 配置中，如果有情況需要修改則可以參照上表。
+  在 Windows 與 Mac 的 `設定` - `連接設定` - `連接地址` 配置中，如果有情況需要修改則可以參照上表。
 
 - 多開情況
-
   - 夜神模擬器第一個設備通訊埠為 `62001` ，第二個通訊埠從 `62025` 開始遞增。
   - 網易 MuMu 模擬器 12 版本多開時 adb 通訊埠無規律，可以通過點擊 MuMu 多開器 12，啟動需要執行的模擬器，點擊右上角的 ADB 圖示，即可查看目前正在執行的模擬器 adb 通訊埠資訊。
   - 雷電模擬器從 9 版本開始，模擬器 adb 從本地通訊埠 `5555` 開始逐個遞增 2 ，比如第二個模擬器本地通訊埠為 `5557`。
@@ -129,67 +128,6 @@ winget install "Microsoft.VCRedist.2015+.x64" --override "/repair /passive /nore
 
 如果這樣也無法正常使用，可將 `連接設定` - `觸控模式` 從 `Minitouch` 切換到 `MaaTouch` 再次嘗試。由於 `Adb Input` 操作過於緩慢，請僅將其作為萬不得已的模式。
 
-## 藍疊模擬器每次啟動通訊埠號都不一樣（Hyper-V）
-
-打開 MAA，在 `設定` - `連接設定` 中設定 `連接配置` 為 `藍疊模擬器` ，隨後勾選 `自動檢測連接` 和 `每次重新檢測` （或是在主界面 `開始喚醒` 旁的設定中勾選這兩項）
-
-通常情況下這樣設定就能連上了。如果沒能連上，可能是你安裝了多個模擬器核心或是該功能出現問題，可以根據下面的指導來進行額外設定
-
-### 指定 `Bluestacks.Config.Keyword`
-
-::: info 注意
-如果你啟用了多開功能或是安裝了多個模擬器核心，那麼你需要進行額外設定來指定使用的模擬器編號
-:::
-
-在 `gui.json` 中添加 `Bluestacks.Config.Keyword` 欄位，內容為 `"bst.instance.模擬器編號.status.adb_port"`，模擬器編號可在模擬器路徑的 `BlueStacks_nxt\Engine` 中看到
-
-::: details 範例
-
-Nougat64 核心：
-
-```json
-"Bluestacks.Config.Keyword":"bst.instance.Nougat64.status.adb_port",
-```
-
-Pie64_2 核心：（核心名稱後的數字代表這是一個多開核心）
-
-```json
-"Bluestacks.Config.Keyword": "bst.instance.Pie64_2.status.adb_port",
-```
-
-:::
-
-### 指定 `Bluestacks.Config.Path`
-
-::: info 注意
-MAA 現在會嘗試從註冊表中讀取 `bluestacks.conf` 的儲存位置，當該功能失效或出錯時，你需要手動指定配置檔案路徑
-:::
-
-1. 在藍疊模擬器的數據目錄下找到 `bluestacks.conf` 這個檔案
-
-    - 國際版預設路徑為 `C:\ProgramData\BlueStacks_nxt\bluestacks.conf`
-    - 中國內地版預設路徑為 `C:\ProgramData\BlueStacks_nxt_cn\bluestacks.conf`
-
-2. 如果是第一次使用，請開啟一次 MAA，會在 MAA 的 `config` 目錄下產生 `gui.json`。
-
-3. **先關閉** MAA，**然後** 打開 `gui.json`，找到 `Configurations` 下的目前配置名欄位（可在 設定 - 切換配置 中查看，預設為 `Default`），在其中新增一個欄位 `Bluestacks.Config.Path`，填入 `bluestacks.conf` 的完整路徑。（注意斜槓要用轉義 `\\`）
-
-::: details 範例
-以 `C:\ProgramData\BlueStacks_nxt\bluestacks.conf` 為例
-
-```json
-{
-    "Configurations": {
-        "Default": {
-            "Bluestacks.Config.Path":"C:\\ProgramData\\BlueStacks_nxt\\bluestacks.conf",
-            // 其餘配置欄位，不要手動輸入修改
-        }
-    }
-}
-```
-
-:::
-
 ## 連接正常，但是操作卡頓、異常或頻繁出錯
 
 - 若使用了 `異形螢幕 UI 適配`，請將其調整為 0。
@@ -198,6 +136,7 @@ MAA 現在會嘗試從註冊表中讀取 `bluestacks.conf` 的儲存位置，當
 - 若自動戰鬥頻繁暫停且不下幹員，請關閉 `設置` - `運行設置` 中的 `劃火柴模式`。
 - 若自動編隊無法正常識別幹員，請取消對應幹員的特別關注。
 - `Adb Input` 觸控模式操作緩慢為正常情況，如需自動戰鬥等請嘗試切換其他模式。
+- 若正在使用 MuMu 模擬器，請勿將 `視訊記憶體使用策略` 設置為 `資源占用更小`。
 
 ### 提示截圖用時較長 / 過長
 

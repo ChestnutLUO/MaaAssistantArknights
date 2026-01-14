@@ -10,9 +10,9 @@
     xmlns:helper="clr-namespace:MaaWpfGui.Helper"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:s="https://github.com/canton7/Stylet"
-    xmlns:viewModels="clr-namespace:MaaWpfGui.ViewModels.UserControl.Settings"
+    xmlns:settings_vms="clr-namespace:MaaWpfGui.ViewModels.UserControl.Settings"
     d:Background="White"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:TimerSettingsUserControlModel}}"
+    d:DataContext="{d:DesignInstance {x:Type settings_vms:TimerSettingsUserControlModel}}"
     d:DesignHeight="450"
     s:View.ActionTarget="{Binding}"
     mc:Ignorable="d">
@@ -35,22 +35,25 @@
             Grid.Row="1"
             HorizontalAlignment="Center"
             Orientation="Horizontal">
-            <CheckBox
-                Height="30"
-                Margin="5,0"
-                HorizontalAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="{DynamicResource ForceScheduledStart}"
-                IsChecked="{Binding ForceScheduledStart}"
-                ToolTip="{DynamicResource ForceScheduledStartTip}" />
-            <CheckBox
-                Height="30"
-                Margin="5,0"
-                HorizontalAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="{DynamicResource TimerCustomConfig}"
-                IsChecked="{Binding CustomConfig}"
-                ToolTip="{DynamicResource TimerCustomConfigTip}" />
+            <StackPanel Margin="5,0" Orientation="Horizontal">
+                <CheckBox
+                    Height="30"
+                    HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Content="{DynamicResource ForceScheduledStart}"
+                    IsChecked="{Binding ForceScheduledStart}" />
+                <controls:TooltipBlock TooltipText="{DynamicResource ForceScheduledStartTip}" />
+            </StackPanel>
+
+            <StackPanel Margin="5,0" Orientation="Horizontal">
+                <CheckBox
+                    Height="30"
+                    HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Content="{DynamicResource TimerCustomConfig}"
+                    IsChecked="{Binding CustomConfig}" />
+                <controls:TooltipBlock TooltipText="{DynamicResource TimerCustomConfigTip}" />
+            </StackPanel>
         </StackPanel>
 
         <StackPanel

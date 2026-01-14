@@ -4,8 +4,8 @@
 
 #include "Config/TaskData.h"
 #include "Controller/Controller.h"
+#include "MaaUtils/ImageIo.h"
 #include "Task/ProcessTask.h"
-#include "Utils/ImageIo.hpp"
 #include "Utils/Logger.hpp"
 #include "Vision/MultiMatcher.h"
 #include "Vision/RegionOCRer.h"
@@ -23,7 +23,7 @@ bool asst::AccountSwitchTask::_run()
         return false;
     }
 
-    if (ranges::find(SupportedClientType, m_client_type) == SupportedClientType.end()) {
+    if (std::ranges::find(SupportedClientType, m_client_type) == SupportedClientType.end()) {
         Log.error(__FUNCTION__, "unsupported client");
         return false;
     }
@@ -127,7 +127,7 @@ bool asst::AccountSwitchTask::swipe_and_select(bool to_top)
         if (click) {
             return click_manager_login_button();
         }
-        if (repeat++ > 10) {
+        if (repeat++ > 20) {
             // 没找到对应账号
             return false;
         }

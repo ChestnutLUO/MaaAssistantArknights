@@ -11,7 +11,7 @@
 #include "Task/Fight/StageNavigationTask.h"
 #include "Task/ProcessTask.h"
 #include "Utils/Logger.hpp"
-#include "Utils/Ranges.hpp"
+#include <ranges>
 
 asst::FightTask::FightTask(const AsstCallback& callback, Assistant* inst) :
     InterfaceTask(callback, inst, TaskType),
@@ -72,16 +72,17 @@ bool asst::FightTask::set_params(const json::value& params)
 
     m_fight_times_prt->set_fight_times(times);
     if (series == 1000) {
-        Log.warn("================  DEPRECATED  ================");
-        Log.warn("series = 1000, 已弃用");
-        Log.warn("================  DEPRECATED  ================");
-        m_fight_times_prt->set_series(0);
-    }
+        Log.error("================  DEPRECATED  ================");
+        Log.error("series = 1000, 已弃用");
+        Log.error("================  DEPRECATED  ================");
+        return false;
+    } // v5.16.0
     else if (series < -1 || series > 6) {
         Log.error("Invalid series");
         return false;
     }
     else {
+        m_medicine_plugin->set_reduce_when_exceed(series == 0);
         m_fight_times_prt->set_series(series);
     }
 

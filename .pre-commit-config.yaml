@@ -1,32 +1,45 @@
 default_install_hook_types: [pre-commit, prepare-commit-msg]
-ci:
-  autofix_commit_msg: "chore: Auto update by pre-commit hooks [skip changelog]"
-  autofix_prs: true
 repos:
   - repo: https://github.com/shssoichiro/oxipng
-    rev: v9.1.4
+    rev: v10.0.0
     hooks:
       - id: oxipng
+        name: PNG Image Compression
         args: ["-q", "-o", "2", "-s", "--ng"]
+
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.0
+    rev: v21.1.8
     hooks:
       - id: clang-format
+        name: Clang-Format (MaaCore)
         files: ^src/MaaCore/.*
         args: ["--assume-filename", ".clang-format"]
+
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.5.3
+    rev: v3.7.4
     hooks:
       - id: prettier
-        files: ^((\.github/ISSUE_TEMPLATE|docs|resource|src|tools|website)/.*|\.pre-commit-config\.yaml|package-definition\.json)
+        name: Prettier (Config Files)
+        files: ^((\.github/ISSUE_TEMPLATE|resource|src|tools)/.*|\.pre-commit-config\.yaml|package-definition\.json)
         types_or:
           - yaml
           - json
+      - id: prettier
+        name: Prettier (Documentation)
+        files: ^docs/.*
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-format
+        name: Ruff format (Python)
+
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.17.2
+    rev: v0.18.1
     hooks:
       - id: markdownlint-cli2
+        name: MarkdownLint (Documentation)
         files: ^docs/.*|^README\.md$
         types:
           - markdown
-        args: ["--fix", "--config", "docs/.markdownlint.yaml", "#**/node_modules"]
+        args: ["--fix", "--config", "docs/.markdownlint.yaml"]

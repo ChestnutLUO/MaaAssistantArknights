@@ -1,13 +1,13 @@
 #include "RoguelikeRecruitSupportAnalyzer.h"
 
 #include <algorithm>
-#include <regex>
+#include <boost/regex.hpp>
 
 #include "Config/Miscellaneous/BattleDataConfig.h"
 #include "Config/TaskData.h"
 #include "Controller/Controller.h"
+#include "MaaUtils/NoWarningCV.hpp"
 #include "Utils/Logger.hpp"
-#include "Utils/NoWarningCV.h"
 #include "Vision/Matcher.h"
 #include "Vision/OCRer.h"
 #include "Vision/RegionOCRer.h"
@@ -113,6 +113,7 @@ bool asst::RoguelikeRecruitSupportAnalyzer::analyze()
         // 未处在冷却时间
         analyzer.set_task_info("RoguelikeRefreshSupportBtnOcr");
         if (analyzer.analyze()) {
+            Log.info(__FUNCTION__, "| RefreshSupportBtn no cooldown");
             m_refresh_result = { analyzer.get_result().front().rect, false, 0 };
             return true;
         }
@@ -121,14 +122,14 @@ bool asst::RoguelikeRecruitSupportAnalyzer::analyze()
         analyzer.set_required({});
         analyzer.set_replace({ { "：", ":" } });
         if (!analyzer.analyze()) {
-            Log.info(__FUNCTION__, "| RefreshSupportBtn analyse failed");
+            Log.info(__FUNCTION__, "| RefreshSupportBtn analyze failed");
             return false;
         }
         const auto& results = analyzer.get_result();
         for (const auto& result : results) {
             Log.info(__FUNCTION__, "| RefreshSupportBtn parse `", result.text, "`", result.score);
-            std::smatch match_results;
-            if (std::regex_search(result.text, match_results, std::regex("[0-9]{2}:[0-9]{2}:[0-9]{2}"))) {
+            boost::smatch match_results;
+            if (boost::regex_search(result.text, match_results, boost::regex("[0-9]{2}:[0-9]{2}:[0-9]{2}"))) {
                 const auto& match_str = match_results[0].str();
                 const auto& hour = std::atoi(match_str.substr(2).c_str());
                 const auto& min = std::atoi(match_str.substr(3, 2).c_str());
@@ -137,7 +138,7 @@ bool asst::RoguelikeRecruitSupportAnalyzer::analyze()
                 return true;
             }
         }
-        Log.info(__FUNCTION__, "| RefreshSupportBtn failed: no matched reusults");
+        Log.info(__FUNCTION__, "| RefreshSupportBtn failed: no matched results");
         return false;
     }
 
@@ -216,7 +217,7 @@ int asst::RoguelikeRecruitSupportAnalyzer::match_level(const Rect& roi)
 
     Log.info(__FUNCTION__, "| ", roi, "`", analyzer.get_result().text, "`");
     const std::string& level = analyzer.get_result().text;
-    if (level.empty() || !ranges::all_of(level, [](char c) -> bool { return std::isdigit(c); })) {
+    if (level.empty() || !std::ranges::all_of(level, [](char c) -> bool { return std::isdigit(c); })) {
         return 0;
     }
     return std::stoi(level);

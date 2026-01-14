@@ -1,6 +1,6 @@
 // <copyright file="MouseWheelHelper.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -15,32 +15,31 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace MaaWpfGui.Helper
-{
-    public static class MouseWheelHelper
-    {
-        public static void RouteMouseWheelToParent(object sender, MouseWheelEventArgs e)
-        {
-            if (e.Handled)
-            {
-                return;
-            }
+namespace MaaWpfGui.Helper;
 
-            e.Handled = true;
-            var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
-            {
-                RoutedEvent = UIElement.MouseWheelEvent,
-            };
-            var parent = ((Control)sender).Parent as UIElement;
-            parent?.RaiseEvent(eventArg);
+public static class MouseWheelHelper
+{
+    public static void RouteMouseWheelToParent(object sender, MouseWheelEventArgs e)
+    {
+        if (e.Handled)
+        {
+            return;
         }
 
-        public static void DisableComboBoxScrollWhenClosed(object sender, MouseWheelEventArgs e)
+        e.Handled = true;
+        var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
         {
-            if (sender is ComboBox { IsDropDownOpen: false })
-            {
-                e.Handled = true; // 阻止滚动
-            }
+            RoutedEvent = UIElement.MouseWheelEvent,
+        };
+        var parent = ((Control)sender).Parent as UIElement;
+        parent?.RaiseEvent(eventArg);
+    }
+
+    public static void DisableComboBoxScrollWhenClosed(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is ComboBox { IsDropDownOpen: false })
+        {
+            e.Handled = true; // 阻止滚动
         }
     }
 }

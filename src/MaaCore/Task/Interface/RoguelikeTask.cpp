@@ -34,8 +34,14 @@
 #include "Task/Roguelike/Sami/RoguelikeFoldartalUseTaskPlugin.h"
 
 // ------------------ 萨卡兹主题专用配置及插件 ------------------
-#include "Task/Roguelike/Map/RoguelikeRoutingTaskPlugin.h"
 #include "Task/Roguelike/RoguelikeInputSeedTaskPlugin.h"
+
+// ------------------ 导航相关配置及插件 ------------------
+#include "Task/Roguelike/Map/RoguelikeBoskyPassageRoutingTaskPlugin.h"
+#include "Task/Roguelike/Map/RoguelikeRoutingTaskPlugin.h"
+
+// ------------------ 界园主题专用配置及插件 ------------------
+#include "Task/Roguelike/JieGarden/RoguelikeCoppersTaskPlugin.h"
 
 #include "Utils/Logger.hpp"
 
@@ -46,7 +52,7 @@ asst::RoguelikeTask::RoguelikeTask(const AsstCallback& callback, Assistant* inst
 {
     LogTraceFunction;
 
-    m_roguelike_task_ptr->set_ignore_error(true);
+    // m_roguelike_task_ptr->set_ignore_error(true);
     m_control_ptr = m_roguelike_task_ptr->register_plugin<RoguelikeControlTaskPlugin>(m_config_ptr);
 
     // ------------------ 通用插件 ------------------
@@ -95,13 +101,16 @@ asst::RoguelikeTask::RoguelikeTask(const AsstCallback& callback, Assistant* inst
     m_roguelike_task_ptr->register_plugin<RoguelikeCollapsalParadigmTaskPlugin>(m_config_ptr, m_control_ptr);
 
     // ------------------ 萨卡兹主题专用插件 ------------------
-    m_roguelike_task_ptr->register_plugin<RoguelikeRoutingTaskPlugin>(m_config_ptr, m_control_ptr);
     m_roguelike_task_ptr->register_plugin<RoguelikeInputSeedTaskPlugin>(m_config_ptr, m_control_ptr);
 
-    // 这个任务如果卡住会放弃当前的肉鸽并重新开始，所以多添加亿点。先这样凑合用
-    for (int i = 0; i != 999; ++i) {
-        m_subtasks.emplace_back(m_roguelike_task_ptr);
-    }
+    // ------------------ 导航相关插件 ------------------
+    m_roguelike_task_ptr->register_plugin<RoguelikeRoutingTaskPlugin>(m_config_ptr, m_control_ptr);
+    m_roguelike_task_ptr->register_plugin<RoguelikeBoskyPassageRoutingTaskPlugin>(m_config_ptr, m_control_ptr);
+
+    // ------------------ 界园主题专用插件 ------------------
+    m_roguelike_task_ptr->register_plugin<RoguelikeCoppersTaskPlugin>(m_config_ptr, m_control_ptr);
+
+    m_subtasks.emplace_back(m_roguelike_task_ptr);
 }
 
 bool asst::RoguelikeTask::set_params(const json::value& params)
@@ -127,7 +136,12 @@ bool asst::RoguelikeTask::set_params(const json::value& params)
             // 战斗后奖励默认
             Task.set_task_base(theme + "@Roguelike@DropsFlag", theme + "@Roguelike@DropsFlag_default");
             m_roguelike_task_ptr->set_times_limit("StageTraderInvestCancel", INT_MAX);
-            m_roguelike_task_ptr->set_times_limit("StageTraderLeaveConfirm", 0, ProcessTask::TimesLimitType::Post);
+            if (theme == RoguelikeTheme::JieGarden) {
+                m_roguelike_task_ptr->set_times_limit("StageTraderLeaveConfirm", INT_MAX);
+            }
+            else {
+                m_roguelike_task_ptr->set_times_limit("StageTraderLeaveConfirm", 0, ProcessTask::TimesLimitType::Post);
+            }
         }
         else {
             // 战斗后奖励只拿钱

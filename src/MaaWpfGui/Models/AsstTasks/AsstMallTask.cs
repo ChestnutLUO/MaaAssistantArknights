@@ -1,6 +1,6 @@
 // <copyright file="AsstMallTask.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -35,8 +35,8 @@ public class AsstMallTask : AsstBaseTask
     /// <summary>
     /// Gets or sets a value indicating whether 信用战斗选择编队
     /// </summary>
-    [JsonProperty("select_formation")]
-    public int SelectFormation { get; set; }
+    [JsonProperty("formation_index")]
+    public int FormationIndex { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether 是否访问好友

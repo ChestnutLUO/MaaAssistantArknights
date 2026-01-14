@@ -9,15 +9,15 @@ dir:
 
 ::: center
 
-![MAA Logo](/images/maa-logo_512x512.png =256x256)
+![MAA Logo =256x256](/images/maa-logo_512x512.png)
 
 <!-- markdownlint-restore -->
 
-# MaaAssistantArknights
+# MAA
 
-![C++](https://img.shields.io/badge/C++-20-%2300599C?logo=cplusplus)
-![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blueviolet)
-![license](https://img.shields.io/github/license/MaaAssistantArknights/MaaAssistantArknights) ![commit](https://img.shields.io/github/commit-activity/m/MaaAssistantArknights/MaaAssistantArknights?color=%23ff69b4)
+![C++](https://img.shields.io/badge/C++-20-%2300599C?logo=cplusplus)  
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blueviolet)  
+![license](https://img.shields.io/github/license/MaaAssistantArknights/MaaAssistantArknights) ![commit](https://img.shields.io/github/commit-activity/m/MaaAssistantArknights/MaaAssistantArknights?color=%23ff69b4)  
 ![stars](https://img.shields.io/github/stars/MaaAssistantArknights/MaaAssistantArknights?style=social) ![GitHub all releases](https://img.shields.io/github/downloads/MaaAssistantArknights/MaaAssistantArknights/total?style=social)
 
 MAA 的意思是 MAA Assistant Arknights
@@ -26,7 +26,7 @@ MAA 的意思是 MAA Assistant Arknights
 
 基于图像识别技术，一键完成全部日常任务！
 
-绝赞更新中  ✿✿ヽ(°▽°)ノ✿
+绝赞更新中 ✿✿ヽ(°▽°)ノ✿
 
 :::
 
@@ -36,7 +36,7 @@ MAA 的意思是 MAA Assistant Arknights
 
 ## 亮点功能
 
-- 刷理智，掉落识别及上传 [企鹅物流](https://penguin-stats.cn/)，[一图流](https://ark.yituliu.cn/)
+- 理智作战，掉落识别及上传 [企鹅物流](https://penguin-stats.cn/)，[一图流](https://ark.yituliu.cn/)
 - 智能基建换班，自动计算干员效率，单设施内最优解；同时也支持 [自定义排班](./protocol/base-scheduling-schema.md)
 - 自动公招，可选使用加急许可，一次全部刷完！公招数据自动上传 [企鹅物流](https://penguin-stats.cn/result/stage/recruit/recruit)，[一图流](https://ark.yituliu.cn/survey/maarecruitdata)
 - 支持手动识别公招界面，方便对高星公招做出选择 ~~（你的这个高资回费出的是推王呢还是推王呢）~~
@@ -47,30 +47,26 @@ MAA 的意思是 MAA Assistant Arknights
 - 选择作业 JSON 文件，自动抄作业， [视频演示](https://www.bilibili.com/video/BV1H841177Fk/)
 - 支持 C, Python, Java, Rust, Golang, Java HTTP, Rust HTTP 等多种接口，方便集成调用，自定义你的 MAA！
 
-话不多说，看图！  
+话不多说，看图！
 
-```component Image4
-{
-  "imageList": [
-    {
-      "light": "images/zh-cn/readme/1-light.png",
-      "dark": "images/zh-cn/readme/1-dark.png"
-    },
-    {
-      "light": "images/zh-cn/readme/2-light.png",
-      "dark": "images/zh-cn/readme/2-dark.png"
-    },
-    {
-      "light": "images/zh-cn/readme/3-light.png",
-      "dark": "images/zh-cn/readme/3-dark.png"
-    },
-    {
-      "light": "images/zh-cn/readme/4-light.png",
-      "dark": "images/zh-cn/readme/4-dark.png"
-    }
-  ]
-}
-```
+<ImageGrid :imageList="[
+  {
+    light: 'images/zh-cn/readme/1-light.png',
+    dark: 'images/zh-cn/readme/1-dark.png'
+  },
+  {
+    light: 'images/zh-cn/readme/2-light.png',
+    dark: 'images/zh-cn/readme/2-dark.png'
+  },
+  {
+    light: 'images/zh-cn/readme/3-light.png',
+    dark: 'images/zh-cn/readme/3-dark.png'
+  },
+  {
+    light: 'images/zh-cn/readme/4-light.png',
+    dark: 'images/zh-cn/readme/4-dark.png'
+  }
+]" />
 
 ## 使用说明
 
@@ -91,33 +87,21 @@ MAA 支持命令行界面（CLI）操作，支持 Linux，macOS 和 Windows，�
 
 ### 主要关联项目
 
-**目前项目组非常缺前端大佬，若您有相关经验，欢迎加入我们！**
-
 - 全新框架：[MaaFramework](https://github.com/MaaXYZ/MaaFramework)
-- [作业站](https://prts.plus) 前端：[maa-copilot-frontend](https://github.com/MaaAssistantArknights/maa-copilot-frontend)
-- [作业站](https://prts.plus) 后端：[MaaBackendCenter](https://github.com/MaaAssistantArknights/MaaBackendCenter)
-- [官网](https://maa.plus)：[前端](https://github.com/MaaAssistantArknights/MaaAssistantArknights/tree/dev/website)
+- [作业站](https://prts.plus) 前端：[zoot-plus-frontend](https://github.com/ZOOT-Plus/zoot-plus-frontend)
+- [作业站](https://prts.plus) 后端：[ZootPlusBackend](https://github.com/ZOOT-Plus/ZootPlusBackend)
+- [官网](https://maa.plus)：[前端](https://github.com/MaaAssistantArknights/maa-website)
 - 深度学习：[MaaAI](https://github.com/MaaAssistantArknights/MaaAI)
 
 ### 多语言 (i18n)
 
-MAA 支持多国语言，并使用 Weblate 进行本地化管理。如果您通晓多门语言，欢迎前往 [MAA Weblate](https://weblate.maa-org.net) 帮助我们进行翻译。
-
 MAA 以中文（简体）为第一语言，翻译词条均以中文（简体）为准。
-
-[![Weblate](https://weblate.maa-org.net/widget/maa/wpf-gui/multi-auto.svg)](https://weblate.maa-org.net/engage/maa/)
 
 ### 参与开发
 
-#### Windows
+请参阅 [开发指南](./develop/development.md)。
 
-请参阅 [开发前须知](./develop/development.md)。
-
-#### Linux | macOS
-
-请参阅 [Linux 编译教程](./develop/linux-tutorial.md)。
-
-#### API
+### API
 
 - [C 接口](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/include/AsstCaller.h)：[集成示例](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/src/Cpp/main.cpp)
 - [Python 接口](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/src/Python/asst/asst.py)：[集成示例](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/src/Python/sample.py)
@@ -133,15 +117,11 @@ MAA 以中文（简体）为第一语言，翻译词条均以中文（简体）�
 - [任务流程协议](./protocol/task-schema.md)
 - [自动抄作业协议](./protocol/copilot-schema.md)
 
-#### 外服适配
+### 外服适配
 
 请参阅 [外服适配教程](./develop/overseas-client-adaptation.md)，对于国服已支持的功能，绝大部分的外服适配工作仅需要截图 + 简单的 JSON 修改即可。
 
-#### 想参与开发，但不太会用 GitHub?
-
-[GitHub Pull Request 流程简述](./develop/development.md#github-pull-request-流程简述)
-
-#### Issue bot
+### Issue bot
 
 请参阅 [Issue Bot 使用方法](./develop/issue-bot-usage.md)
 
@@ -195,13 +175,13 @@ MAA 以中文（简体）为第一语言，翻译词条均以中文（简体）�
 
 ## 广告
 
-用户交流 QQ 群：[MAA 使用 & 粥游交流 QQ 群](https://ota.maa.plus/MaaAssistantArknights/api/qqgroup/index.html)  
+用户交流 QQ 群：[MAA 使用 & 粥游交流 QQ 群](https://api.maa.plus/MaaAssistantArknights/api/qqgroup/index.html)  
 Discord 服务器: [邀请链接](https://discord.gg/23DfZ9uA4V)  
 用户交流 TG 群：[Telegram 群](https://t.me/+Mgc2Zngr-hs3ZjU1)  
 自动战斗 JSON 作业分享：[prts.plus](https://prts.plus)  
-Bilibili 直播间：[MrEO 直播间](https://live.bilibili.com/2808861) 直播敲代码 & [MAA-Official 直播间](https://live.bilibili.com/27548877) 游戏/杂谈  
+Bilibili 直播间：[MrEO 直播间](https://live.bilibili.com/2808861) 直播敲代码 & [MAA-Official 直播间](https://live.bilibili.com/27548877) 游戏/杂谈
 
 技术群（舟无关、禁水）：[内卷地狱！(QQ 群)](https://jq.qq.com/?_wv=1027&k=ypbzXcA2)  
-开发者群：[QQ 群](https://jq.qq.com/?_wv=1027&k=JM9oCk3C)  
+开发者群：[QQ 群](https://jq.qq.com/?_wv=1027&k=JM9oCk3C)
 
 如果觉得软件对你有帮助，帮忙点个 Star 吧！~（网页最上方右上角的小星星），这就是对我们最大的支持了！

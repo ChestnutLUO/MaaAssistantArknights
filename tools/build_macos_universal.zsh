@@ -10,7 +10,7 @@ pushd ${basedir}
 build_arch() {
     [[ $1 = "arm64" ]] && triplet="arm64-osx" || triplet="x64-osx"
 
-    python3 maadeps-download.py ${triplet}
+    python3 tools/maadeps-download.py ${triplet}
 
     if [[ -n $(which ccache) ]]; then
         export CMAKE_C_COMPILER_LAUNCHER=ccache
@@ -45,6 +45,7 @@ cp build-"${arch}"/compile_commands.json build
 
 pushd build
 xcodebuild -create-xcframework -library libMaaCore.dylib -headers ../include -output MaaCore.xcframework
+xcodebuild -create-xcframework -library libMaaUtils.dylib -output MaaUtils.xcframework
 xcodebuild -create-xcframework -library libfastdeploy_ppocr.dylib -output fastdeploy_ppocr.xcframework
 xcodebuild -create-xcframework -library libonnxruntime.*.dylib -output ONNXRuntime.xcframework
 xcodebuild -create-xcframework -library libopencv*.dylib -output OpenCV.xcframework

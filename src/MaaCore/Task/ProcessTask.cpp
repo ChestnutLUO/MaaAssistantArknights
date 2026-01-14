@@ -157,26 +157,36 @@ ProcessTask::HitDetail ProcessTask::find_first(const TaskList& list) /* const, e
 
     auto res_opt = analyzer.analyze();
     if (!res_opt) {
-        return { .task_ptr = nullptr };
+        return { .image = std::make_shared<cv::Mat>(std::move(image)), .task_ptr = nullptr };
     }
 
     task_ptr = std::move(res_opt->task_ptr);
 
     if (task_ptr->algorithm == AlgorithmType::MatchTemplate) {
-        auto& raw_result = std::get<0>(res_opt->result);
-        return { .rect = res_opt->rect,
-                 .reco_detail = json::object { { "score", raw_result.score } },
+        auto& raw_result = std::get<Matcher::Result>(res_opt->result);
+        return { .image = std::make_shared<cv::Mat>(std::move(image)),
+                 .rect = res_opt->rect,
+                 .reco_detail = std::make_shared<Matcher::Result>(std::move(raw_result)),
                  .task_ptr = task_ptr };
     }
 
     if (task_ptr->algorithm == AlgorithmType::OcrDetect) {
-        auto& raw_result = std::get<1>(res_opt->result);
-        return { .rect = res_opt->rect,
-                 .reco_detail = json::object { { "score", raw_result.score }, { "text", raw_result.text } },
+        auto& raw_result = std::get<OCRer::Result>(res_opt->result);
+        return { .image = std::make_shared<cv::Mat>(std::move(image)),
+                 .rect = res_opt->rect,
+                 .reco_detail = std::make_shared<OCRer::Result>(std::move(raw_result)),
                  .task_ptr = task_ptr };
     }
 
-    return { .rect = res_opt->rect, .task_ptr = task_ptr };
+    if (task_ptr->algorithm == AlgorithmType::FeatureMatch) {
+        auto& raw_result = std::get<FeatureMatcher::Result>(res_opt->result);
+        return { .image = std::make_shared<cv::Mat>(std::move(image)),
+                 .rect = res_opt->rect,
+                 .reco_detail = std::make_shared<FeatureMatcher::Result>(std::move(raw_result)),
+                 .task_ptr = task_ptr };
+    }
+
+    return { .image = std::make_shared<cv::Mat>(std::move(image)), .rect = res_opt->rect, .task_ptr = task_ptr };
 }
 
 // action 为 Stop 时返回 Interrupted, 其它返回 Success
@@ -208,7 +218,8 @@ ProcessTask::NodeStatus ProcessTask::run_action(const HitDetail& hits) const
             (param_size > 0) ? task->special_params.at(0) : 0,
             (param_size > 1) ? task->special_params.at(1) : false,
             (param_size > 2) ? task->special_params.at(2) : 1,
-            (param_size > 3) ? task->special_params.at(3) : 1);
+            (param_size > 3) ? task->special_params.at(3) : 1,
+            task->high_resolution_swipe_fix);
         return NodeStatus::Success;
     }
     case ProcessTaskAction::DoNothing:
@@ -249,7 +260,7 @@ ProcessTask::NodeStatus ProcessTask::run_task(const HitDetail& hits)
         { "max_times", max_times },
         { "action", enum_to_string(task->action) },
         { "algorithm", enum_to_string(task->algorithm) },
-        { "result", hits.reco_detail },
+        { "result", hits.reco_detail != nullptr ? *hits.reco_detail : json::object {} },
     };
 
     callback(AsstMsg::SubTaskStart, info);
@@ -272,7 +283,7 @@ ProcessTask::NodeStatus ProcessTask::run_task(const HitDetail& hits)
     status()->set_number(Status::ProcessTaskLastTimePrefix + task_name, time(nullptr));
 
     // 减少其他任务的执行次数
-    // 例如，进入吃理智药的界面了，相当于上一次点蓝色开始行动没生效
+    // 例如，进入药剂恢复的界面了，相当于上一次点蓝色开始行动没生效
     // 所以要给蓝色开始行动的次数减一
     for (const std::string& other_task : task->reduce_other_times) {
         if (int& v = m_exec_times[other_task]; v > 0) {
@@ -334,6 +345,7 @@ std::pair<ProcessTask::NodeStatus, TaskConstPtr> ProcessTask::find_and_run_task(
     }
 
     m_pre_task_name = std::move(m_last_task_name);
+    m_last_hit_detail = nullptr;
 
     HitDetail hits;
     for (int cur_retry = 0; cur_retry <= m_retry_times; ++cur_retry) {
@@ -362,7 +374,8 @@ std::pair<ProcessTask::NodeStatus, TaskConstPtr> ProcessTask::find_and_run_task(
         return { NodeStatus::Interrupted, nullptr };
     }
 
-    return { run_task(hits), hits.task_ptr };
+    m_last_hit_detail = std::make_shared<HitDetail>(std::move(hits));
+    return { run_task(*m_last_hit_detail), m_last_hit_detail->task_ptr };
 }
 
 ProcessTask::TimesLimitData ProcessTask::calc_time_limit(TaskConstPtr task) const
@@ -419,7 +432,8 @@ void ProcessTask::exec_swipe_task(
     int duration,
     bool extra_swipe,
     double slope_in,
-    double slope_out) const
+    double slope_out,
+    bool high_resolution_swipe_fix) const
 {
-    ctrler()->swipe(r1, r2, duration, extra_swipe, slope_in, slope_out);
+    ctrler()->swipe(r1, r2, duration, extra_swipe, slope_in, slope_out, false, high_resolution_swipe_fix);
 }

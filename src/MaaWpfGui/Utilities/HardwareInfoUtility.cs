@@ -1,6 +1,6 @@
 // <copyright file="HardwareInfoUtility.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -12,43 +12,39 @@
 // </copyright>
 
 #nullable enable
-using System;
 using System.Management;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Win32;
 
-namespace MaaWpfGui.Utilities
+namespace MaaWpfGui.Utilities;
+
+public static class HardwareInfoUtility
 {
-    public static class HardwareInfoUtility
+    public static string GetMachineGuid()
     {
-        public static string GetMachineGuid()
+        const string Key = @"SOFTWARE\Microsoft\Cryptography";
+        using RegistryKey? rk = Registry.LocalMachine.OpenSubKey(Key);
+        return rk?.GetValue("MachineGuid")?.ToString() ?? string.Empty;
+    }
+
+    private static string GetCpuInfo()
+    {
+        using var mc = new ManagementClass("Win32_Processor");
+        foreach (var mo in mc.GetInstances())
         {
-            const string Key = @"SOFTWARE\Microsoft\Cryptography";
-            using RegistryKey? rk = Registry.LocalMachine.OpenSubKey(Key);
-            return rk?.GetValue("MachineGuid")?.ToString() ?? string.Empty;
+            return mo["ProcessorId"]?.ToString() ?? string.Empty;
         }
 
-        private static string GetCpuInfo()
-        {
-            using var mc = new ManagementClass("Win32_Processor");
-            foreach (var mo in mc.GetInstances())
-            {
-                return mo["ProcessorId"]?.ToString() ?? string.Empty;
-            }
+        return string.Empty;
+    }
 
-            return string.Empty;
+    private static string GetDiskSerialNumber()
+    {
+        using var mc = new ManagementClass("Win32_DiskDrive");
+        foreach (var mo in mc.GetInstances())
+        {
+            return mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
         }
 
-        private static string GetDiskSerialNumber()
-        {
-            using var mc = new ManagementClass("Win32_DiskDrive");
-            foreach (var mo in mc.GetInstances())
-            {
-                return mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
-            }
-
-            return string.Empty;
-        }
+        return string.Empty;
     }
 }

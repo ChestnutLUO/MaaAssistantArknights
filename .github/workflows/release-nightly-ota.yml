@@ -1,4 +1,4 @@
-name: release-nightly-ota
+name: Release Pipeline (Nightly OTA)
 
 on:
   schedule:
@@ -26,21 +26,21 @@ on:
 
 jobs:
   build-win-nightly:
+    name: Build Nightly for Windows
     if: github.repository_owner == 'MaaAssistantArknights'
     runs-on: windows-latest
     strategy:
       matrix:
-        msbuild_target: [x64]
+        arch: [x64]
       fail-fast: false
-    env:
-      MAABUILDER_TARGET_PLATFORM: ${{ matrix.msbuild_target }}
     outputs:
       tag: ${{ steps.set_tag.outputs.tag }}
       pre_version: ${{ steps.set_tag.outputs.pre_version }}
       main_tag_name: ${{ steps.push_main_tag.outputs.main_tag_name }}
       changelog: ${{ steps.read_changelog.outputs.content }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           # repository: 'MaaAssistantArknights/MaaAssistantArknights'
           #ref: ${{ inputs.ref }}
@@ -53,6 +53,7 @@ jobs:
 
       - name: Fetch submodules
         run: |
+          git submodule update --init --depth 1 src/MaaUtils
           git submodule update --init --depth 1 3rdparty/EmulatorExtras
 
       - name: Checkout ref (if provided)
@@ -140,7 +141,7 @@ jobs:
 
           gh run watch ${{ github.run_id }}
 
-      - name: Generate Changelog
+      - name: Generate changelog
         id: generate_changelog
         run: |
           python3 tools/ChangelogGenerator/changelog_generator.py --latest "${{ steps.set_tag.outputs.latest_tag }}" --tag "${{ steps.set_tag.outputs.tag }}"
@@ -162,41 +163,57 @@ jobs:
 
           gh run watch ${{ github.run_id }}
 
-      - name: Read Changelog to variable
+      - name: Read changelog to variable
         id: read_changelog
         uses: juliangruber/read-file-action@v1
         with:
           path: ./changelog_notag.md
 
-      - name: Cache .nuke/temp, ~/.nuget/packages
-        id: cache-nuget
-        uses: actions/cache@v4
-        with:
-          path: |
-            .nuke/temp
-            ~/.nuget/packages
-          key: ${{ runner.os }}-${{ matrix.msbuild_target }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-
-      - name: Restore dependencies
-        if: steps.cache-nuget.outputs.cache-hit != 'true'
-        run: dotnet restore
-
       - name: Cache MaaDeps
         id: cache-maadeps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
+        continue-on-error: true
         with:
           path: |
-            ./MaaDeps
-          key: ${{ runner.os }}-${{ matrix.msbuild_target }}-maadeps-${{ hashFiles('./maadeps-download.py') }}
+            ./src/MaaUtils/MaaDeps
+          key: ${{ runner.os }}-${{ matrix.arch }}-maadeps-${{ hashFiles('tools/maadeps-download.py') }}
 
       - name: Bootstrap MaaDeps
         if: steps.cache-maadeps.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 maadeps-download.py ${{ matrix.msbuild_target }}-windows
+          python3 tools/maadeps-download.py ${{ matrix.arch }}-windows
 
-      - name: Taggify Version
+      - name: Config cmake
+        run: |
+          mkdir -p build
+          cmake -B build ${{ matrix.arch == 'arm64' && '-A ARM64' }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMAADEPS_TRIPLET='maa-${{ matrix.arch }}-windows' -DINSTALL_RESOURCE=ON -DINSTALL_PYTHON=ON -DMAA_HASH_VERSION='${{ steps.set_tag.outputs.tag }}' -DBUILD_WPF_GUI=OFF
+
+      - name: Build
+        run: |
+          cmake --build build --config RelWithDebInfo --parallel $env:NUMBER_OF_PROCESSORS
+
+      - name: Install
+        run: |
+          mkdir -p install
+          cmake --install build --prefix install --config RelWithDebInfo
+
+      - name: Cache .nuke/temp, ~/.nuget/packages
+        id: cache-nuget
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: |
+            .nuke/temp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ matrix.arch }}-nuget-${{ hashFiles('**/*.csproj') }}
+
+      - name: Restore dependencies
+        if: steps.cache-nuget.outputs.cache-hit != 'true'
+        run: dotnet restore src/MaaWpfGui/MaaWpfGui.csproj
+
+      - name: Taggify version for csproj
         run: |
           $csprojPath = "src/MaaWpfGui/MaaWpfGui.csproj"
           $csprojPath = Resolve-Path -Path $csprojPath
@@ -206,8 +223,6 @@ jobs:
           } else {
               $match = "0.0.1"
           }
-          echo "Tag value: $tag"
-          echo "Version value: $match"
           [xml]$csproj = Get-Content -Path $csprojPath
           $node = $csproj.Project.PropertyGroup | where {$_.ApplicationVersion -ne $null}
           $node.InformationalVersion = $tag
@@ -215,25 +230,38 @@ jobs:
           $node.FileVersion = $match
           $node.AssemblyVersion = $match
           $csproj.Save($csprojPath)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run './build.cmd DevBuild'
+      - name: Publish WPF GUI
         run: |
-          $env:GITHUB_WORKFLOW = 'dev-build-win' # pretend this is a dev-build-win workflow
-          $env:MAA_BUILDER_MAA_VERSION = "${{ steps.set_tag.outputs.tag }}"
-          echo "tag: " $env:MAA_BUILDER_MAA_VERSION
+          dotnet publish src/MaaWpfGui/MaaWpfGui.csproj -c Release -p:Platform=${{ matrix.arch == 'arm64' && 'ARM64' || 'x64' }} -o install
 
-          ./build.cmd DevBuild
-        env:
-          Reason: "Build nightly version"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Collect PDB files
+        run: |
+          cp build/bin/RelWithDebInfo/*.pdb install/
+          Compress-Archive -Path install/*.pdb -DestinationPath install/MAAComponent-DebugSymbol-${{ steps.set_tag.outputs.tag }}-win-${{ matrix.arch }}.zip
+        continue-on-error: true
 
-      - name: Upload MAA to Github
-        uses: actions/upload-artifact@v4
+      - name: Upload PDB files
+        uses: actions/upload-artifact@v6
         with:
-          name: MAA-win-${{ matrix.msbuild_target }}
-          path: artifacts
+          name: MAAComponent-DebugSymbol-win-${{ matrix.arch }}
+          path: install/MAAComponent-DebugSymbol-${{ steps.set_tag.outputs.tag }}-win-${{ matrix.arch }}.zip
+
+      - name: Organize install files
+        shell: bash
+        run: |
+          rm -rf install/MAAComponent-DebugSymbol-*.zip
+          rm -rf install/*.pdb
+          rm -rf install/msvc-debug
+          rm -rf install/*.h
+
+          cp tools/DependencySetup_依赖库安装.bat install
+
+      - name: Upload MAA to GitHub
+        uses: actions/upload-artifact@v6
+        with:
+          name: MAA-win-${{ matrix.arch }}
+          path: install
 
       - name: Push tag to main repo
         id: push_main_tag
@@ -247,12 +275,13 @@ jobs:
           echo "main_tag_name=$main_tag_name" >> $env:GITHUB_OUTPUT
 
   push-tag:
+    name: Push Tag to MaaRelease
     if: github.repository_owner == 'MaaAssistantArknights'
     needs: build-win-nightly
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch MaaRelease
-        uses: actions/checkout@v4
+      - name: Checkout MaaRelease
+        uses: actions/checkout@v6
         with:
           repository: ${{ format('{0}/{1}', github.repository_owner, 'MaaRelease') }}
           fetch-depth: 0
@@ -270,6 +299,7 @@ jobs:
           git push --tags origin HEAD:refs/tags/${{ needs.build-win-nightly.outputs.tag }}
 
   make-ota:
+    name: Build and Upload Nightly OTA for Windows
     if: github.repository_owner == 'MaaAssistantArknights'
     needs: [build-win-nightly, push-tag]
     strategy:
@@ -277,29 +307,38 @@ jobs:
         target: [x64]
     runs-on: ubuntu-latest
     steps:
-      - name: Echo tag version
+      - name: Show tag version
         run: |
           echo ${{ needs.build-win-nightly.outputs.tag }}
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           path: MaaAssistantArknights
           token: ${{ secrets.MAARELEASE_RELEASE }}
           show-progress: false
 
-      - name: Download MAA from Github
-        uses: actions/download-artifact@v4
+      - name: Download MAA from GitHub
+        uses: actions/download-artifact@v7
         with:
           name: MAA-win-${{ matrix.target }}
           path: ${{ format('{0}/{1}', 'build-ota', needs.build-win-nightly.outputs.tag) }}
 
-      - name: Fetch release info
+      - name: Fetch release information
         run: |
           mkdir -pv build-ota && cd build-ota
 
-          gh release list --repo 'MaaAssistantArknights/MaaAssistantArknights' --limit ${{ inputs.limit_maa }} | tee ./release_maa.txt
-          gh release list --repo "${{ github.repository_owner }}/MaaRelease" --limit ${{ inputs.limit_maarelease }} | tee ./release_mr.txt
+          # Convert inputs to integers
+          limit_maa=${{ inputs.limit_maa || 10 }}
+          limit_maa=${limit_maa%.*}
+          echo "Parsed limit_maa: $limit_maa"
+
+          limit_maarelease=${{ inputs.limit_maarelease || 10 }}
+          limit_maarelease=${limit_maarelease%.*}
+          echo "Parsed limit_maarelease: $limit_maarelease"
+
+          gh release list --repo 'MaaAssistantArknights/MaaAssistantArknights' --limit $limit_maa | tee ./release_maa.txt
+          gh release list --repo "${{ github.repository_owner }}/MaaRelease" --limit $limit_maarelease | tee ./release_mr.txt
           echo ${{ needs.build-win-nightly.outputs.tag }} > ./config
 
           cat ./release_maa.txt | awk '{ print $1 }' > ./tags_maa.txt
@@ -319,8 +358,7 @@ jobs:
           cd build-ota
 
           pushd ${{ needs.build-win-nightly.outputs.tag }}
-          zip -d *.zip '*.lib' '*.pdb' '*.exp' '*.config' '*.xml'
-          mv *.zip MAA-${{ env.release_tag }}-win-${{ matrix.target }}.zip
+          zip -r MAA-${{ env.release_tag }}-win-${{ matrix.target }}.zip ./*
           popd
 
           $GITHUB_WORKSPACE/MaaAssistantArknights/tools/OTAPacker/build.sh 'MaaAssistantArknights/MaaAssistantArknights' ./config ${{ matrix.target }} "${{ github.repository_owner }}/MaaRelease"

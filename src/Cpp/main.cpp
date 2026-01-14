@@ -8,13 +8,18 @@
 
 int main([[maybe_unused]] int argc, char** argv)
 {
-    const auto cur_path = std::filesystem::path(argv[0]).parent_path();
+    auto working_path = std::filesystem::path(argv[0]).parent_path();
 
-    // 可以将日志、调试图片等存到别的目录下，需要在最一开始调用。不调用默认保存到资源同目录
-    // AsstSetUserDir(cur_path.c_str());
+    if (!std::filesystem::exists(working_path / "resource")) {
+        std::cerr << "resource folder not found!" << std::endl;
+        return -1;
+    }
+
+    // 可以将日志、调试图片等存到别的目录下,需要在最一开始调用。不调用默认保存到资源同目录
+    // AsstSetUserDir(working_path.c_str());
 
     // 这里默认读取的是可执行文件同目录下 resource 文件夹里的资源
-    if (!AsstLoadResource(cur_path.string().c_str())) {
+    if (!AsstLoadResource(working_path.string().c_str())) {
         std::cerr << "-------- load resource failed: official --------" << std::endl;
         return -1;
     }
@@ -29,7 +34,7 @@ int main([[maybe_unused]] int argc, char** argv)
         else {
             std::cout << "load overseas_type: " << arg << std::endl;
 
-            const auto overseas_path = cur_path / "resource" / "global" / arg;
+            const auto overseas_path = working_path / "resource" / "global" / arg;
             if (!AsstLoadResource(overseas_path.string().c_str())) {
                 std::cerr << "-------- load resource failed: " << arg << " --------" << std::endl;
                 return -1;
@@ -46,6 +51,7 @@ int main([[maybe_unused]] int argc, char** argv)
 
 #ifdef SMOKE_TESTING
     std::cout << "Ended early for smoke testing." << std::endl;
+    AsstDestroy(ptr);
     return 0;
 #endif
 
@@ -57,13 +63,12 @@ int main([[maybe_unused]] int argc, char** argv)
     if (!AsstConnected(ptr)) {
         std::cerr << "connect failed" << std::endl;
         AsstDestroy(ptr);
-        ptr = nullptr;
-
         return -1;
     }
 
-#ifndef ASST_DEBUG
-
+#ifdef ASST_DEBUG
+    AsstAppendTask(ptr, "Debug", nullptr);
+#else
     /* 详细参数可参考 docs / 集成文档.md */
     AsstAppendTask(ptr, "StartUp", nullptr);
 
@@ -121,11 +126,6 @@ int main([[maybe_unused]] int argc, char** argv)
         "core_char": "维什戴尔"
     }
     )");
-
-#else
-
-    AsstAppendTask(ptr, "Debug", nullptr);
-
 #endif
 
     AsstStart(ptr);
@@ -136,7 +136,6 @@ int main([[maybe_unused]] int argc, char** argv)
 
     AsstStop(ptr);
     AsstDestroy(ptr);
-    ptr = nullptr;
 
     return 0;
 }

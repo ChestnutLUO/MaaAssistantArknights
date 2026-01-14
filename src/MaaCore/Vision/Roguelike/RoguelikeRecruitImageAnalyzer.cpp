@@ -1,8 +1,8 @@
 #include "RoguelikeRecruitImageAnalyzer.h"
 
 #include "Config/TaskData.h"
+#include "MaaUtils/NoWarningCV.hpp"
 #include "Utils/Logger.hpp"
-#include "Utils/NoWarningCV.h"
 #include "Vision/Matcher.h"
 #include "Vision/RegionOCRer.h"
 #include "Vision/TemplDetOCRer.h"
@@ -100,7 +100,7 @@ int asst::RoguelikeRecruitImageAnalyzer::match_level(const cv::Mat& image, const
     }
 
     const std::string& level = analyzer.get_result().text;
-    if (level.empty() || !ranges::all_of(level, [](char c) -> bool { return std::isdigit(c); })) {
+    if (level.empty() || !std::ranges::all_of(level, [](char c) -> bool { return std::isdigit(c); })) {
         return 0;
     }
     return std::stoi(level);

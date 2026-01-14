@@ -26,28 +26,28 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 #### Return Value
 
 - `TaskId`  
-    以下の構成で、タスクの追加に成功した場合のタスクID;
-    タスクの追加に失敗した場合は0。
+   以下の構成で、タスクの追加に成功した場合のタスクID;
+  タスクの追加に失敗した場合は0。
 
 #### Parameter Description
 
 - `AsstHandle handle`  
-    Instance handle
+   Instance handle
 - `const char* type`  
-    Task type
+   Task type
 - `const char* params`  
-    Task parameters in JSON
+   Task parameters in JSON
 
 ##### List of Task Types
 
 - `StartUp`  
-    Start-up
+   Start-up
 
 ```json5
 // 対応するタスクのパラメータ
 {
     "enable": bool,              // このタスクを有効にするかどうか、オプション、デフォルトは true
-    "client_type": string,       // クライアントバージョン、オプション、デフォルトは空白
+    "client_type": string,       // クライアントバージョン（必須）
                                  // オプション: "Official" | "Bilibili" | "txwy" | "YoStarEN" | "YoStarJP" | "YoStarKR"
     "start_game_enabled": bool,  // クライアントを自動的に起動するかどうか、オプション, デフォルトはfalse
     "account_name": string       // アカウントの切り替え、オプション、デフォルトで切り替えしません
@@ -58,7 +58,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `CloseDown`  
-  ゲームを閉じる  
+  ゲームを閉じる
 
 ```json5
 // 対応するタスクのパラメータ
@@ -70,7 +70,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Fight`  
-    Operation
+   Operation
 
 ```json5
 // 対応するタスクのパラメータ
@@ -109,7 +109,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 いくつかの特別ステージ名もサポートしています、[組み込み例](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/master/tools/AutoLocalization/example/ja-jp.xaml#L230)をご参照ください
 
 - `Recruit`  
-    公開求人
+   公開求人
 
 ```json5
 // 対応するタスクのパラメータ
@@ -151,7 +151,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Infrast`  
-    基地シフト
+   基地シフト
 
 ```json5
 {
@@ -161,7 +161,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
                             // 10000 - シフト変更モードをカスタマイズし、ユーザー構成を読み取り、プロトコルドキュメント/インフラストシフト.md を参照してください
                             // 20000 - ローテーション: ワンキーローテーションモード。コントロールセンター、発電所、寮、オフィスをスキップします。他の施設はシフトを変更しませんが、基本的な操作は保持されます (ドローンの使用、応接室のロジックなど)
     "facility": [           // シフト対象施設（順序付け）、必須。動作中の編集はサポートされていません.
-        string,             // 施設名: "Mfg" | "Trade" | "Power" | "Control" | "Reception" | "Office" | "Dorm"
+        string,             // 施設名: "Mfg" | "Trade" | "Power" | "Control" | "Reception" | "Office" | "Dorm" | "Processing" | "Training"
         ...
     ],
     "drones": string,       // ドローンの使用, オプション, デフォルトは "_NotUse"
@@ -170,7 +170,10 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
     "threshold": float,     // 宿舎に移動させる体力のしきい値 [0, 1.0]、オプション、デフォルトは 0.3
     "replenish": bool,      // 源石の欠片を自動で補充する、オプション、デフォルトは false
     "dorm_notstationed_enabled": bool, // 寮の「入居していない」オプションを有効にするかどうか、オプション、デフォルトfalse
-    "dorm_trust_enabled": bool, // 寮の残りの場所を信頼未満のオペレーターに記入するかどうか、オプション、デフォルトfalse
+    "dorm_trust_enabled": bool,        // 寮の残りの場所を信頼未満のオペレーターに記入するかどうか、オプション、デフォルトfalse
+    "reception_message_board": bool,   // 応接室の掲示板からクレジットを収集するかどうか、オプション、デフォルトtrue
+    "reception_clue_exchange": bool,   // 手がかり交換を実施するかどうか、オプション、デフォルトtrue
+    "reception_send_clue": bool,       // 手がかりを贈るかどうか、オプション、デフォルトtrue
 
     /* 次のパラメータは、mode=10000でのみ有効になります。そうしないと無視されます */
     "filename": string,     // カスタム構成パス、必須。実行中の設定はサポートされていません
@@ -179,13 +182,14 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Mall`  
-    FPの回収と自動購入  
-    最初に `buy_first` にあるものを左から右に押して順番に一度購入し、次に左から右に2回購入して`blacklist` を回避し、FPオーバーフローの場合はブラックリストを無視して、オーバーフローしなくなるまで左から右に3回目に購入します。
+   FPの回収と自動購入  
+   最初に `buy_first` にあるものを左から右に押して順番に一度購入し、次に左から右に2回購入して`blacklist` を回避し、FPオーバーフローの場合はブラックリストを無視して、オーバーフローしなくなるまで左から右に3回目に購入します。
 
 ```json5
 // 対応するタスクのパラメータ
 {
     "enable": bool,         // このタスクを有効にするかどうか、オプション、デフォルトは true
+    "visit_friends": bool,  // フレンドの基地を訪問してクレジットを獲得するかどうか。任意、デフォルト値は true
     "shopping": bool,       // 購買所から購入するかどうか、オプション、 デフォルトは false。 動作中に変更はできません。
     "buy_first": [          // アイテム購入の優先度、オプション。動作中に変更はできません。
         string,             // アイテム名。例 "招聘许可" (Recruitment Permit/求人票)、"龙门币" (LMD/龍門幣)、その他
@@ -194,14 +198,18 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
     "blacklist": [          // ブラックリスト、オプション。動作中に変更はできません。
         string,             // アイテム名。例 "加急许可" (Expedited Plan/緊急招集票)、"家具零件" (Furniture Part/家具パーツ)、その他
         ...
-    ]
-    "only_buy_discount": bool // 割引対象のアイテムだけを購入するかどうかは。これは2回目の購入の際にのみ適用されます。デフォルトは false。
-    "reserve_max_credit": bool // クレジットポイントが300未満になった場合に購入を停止するかどうかは。これは2回目の購入の際にのみ適用されます。デフォルトは false。
+    ],
+    "force_shopping_if_credit_full": bool,  // クレジットが上限に達した場合、ブラックリストを無視して購入するかどうか。任意、デフォルト値は false
+    "only_buy_discount": bool,              // 割引対象のアイテムだけを購入するかどうかは。これは2回目の購入の際にのみ適用されます。デフォルトは false。
+    "reserve_max_credit": bool,             // クレジットポイントが 300 未満になった場合に購入を停止するかどうかは。これは2回目の購入の際にのみ適用されます。デフォルトは false。
+    "credit_fight": bool,                   // サポートを借りて OF-1 を1回攻略し、翌日により多くのクレジットを獲得するかどうか。任意、デフォルト値は false
+    "formation_index": int                  // OF-1 実行時に使用する編成スロットのインデックス。任意指定可能、デフォルトは 0。
+                                            // 0～4 の整数で、0 は現在の編成を意味し、1～4 はそれぞれ第1～第4編成を表す
 }
 ```
 
 - `Award`  
-    報酬の受け取り  
+   報酬の受け取り
 
 ```json5
 // 対応するタスクのパラメータ
@@ -211,17 +219,18 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Roguelike`  
-    統合戦略  
+   統合戦略
 
 ```json5
 // 対応するタスクパラメータ
 {
     "enable": bool,  // このタスクを有効にするかどうか、省略可能、デフォルト値 true
     "theme": string, // テーマ、省略可能、デフォルト値 "Phantom"
-                     //   Phantom - 傀影と猩紅の血晶
-                     //   Mizuki  - 水月と蒼青の樹
-                     //   Sami    - 探索者の銀霜の果て
-                     //   Sarkaz  - サルカズの無尽の奇譚
+                     //   Phantom   - 傀影と猩紅の血晶
+                     //   Mizuki    - 水月と蒼青の樹
+                     //   Sami      - 探索者の銀霜の果て
+                     //   Sarkaz    - サルカズの無尽の奇譚
+                     //   JieGarden - 界园
     "mode": int,     // モード、省略可能、デフォルト値 0
                      //   0 - ポイント稼ぎ、より安定して層数を増やす
                      //   1 - 源石錠稼ぎ、1層で投資後終了
@@ -254,7 +263,16 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
         string,                         // 開幕でリスト内の全ての密文を持っている場合に開幕リセット成功とする；
         ...                             // 注意、このパラメータは「生活至上部隊」と同時に使用する必要がある。他の部隊では開幕報酬で密文を取得できない；
     ],
-    "start_with_two_ideas": bool,       // 凹 2 構想開局の有無（選択可能、デフォルト値：false）；テーマが Sarkaz で、モードが 4 の時のみ有効
+    "collectible_mode_start_list": {    // 開始時に取得したい報酬。任意項目。デフォルトはすべて false。モード 4 の場合のみ有効
+        "hot_water": bool,              // 魔法瓶（湯）報酬。お湯を沸かす機能のトリガー（共通）
+        "shield": bool,                 // シールド報酬。追加のHP相当（共通）
+        "ingot": bool,                  // 源石錠の報酬（共通）
+        "hope": bool,                   // 希望の報酬（共通。※JieGarden テーマでは無効）
+        "random": bool,                 // ランダム報酬オプション：全ての源石錠を消費してランダムなコレクションを入手（共通）
+        "key": bool,                    // 鍵の報酬。Mizuki テーマでのみ有効
+        "dice": bool,                   // サイコロの報酬。Mizuki テーマでのみ有効
+        "ideas": bool,                  // 2つの構想報酬。Sarkaz テーマでのみ有効
+    },
     "use_foldartal": bool,                    // 密文を使用するか、モード5ではデフォルト値 false、他のモードではデフォルト値 true；Samiテーマにのみ対応
     "check_collapsal_paradigms": bool,        // 取得した崩壊パラダイムを検査するか、モード5ではデフォルト値 true、他のモードではデフォルト値 false
     "double_check_collapsal_paradigms": bool, // 崩壊パラダイムの検査漏れ対策を行うか、モード5ではデフォルト値 true、他のモードではデフォルト値 false；
@@ -267,20 +285,47 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Copilot`  
-    自動戦闘  
+   自動戦闘
 
 ```json5
 {
-    "enable": bool,             // このタスクを有効にするかどうか、オプション、デフォルトは true
-    "filename": string,         // タスクのJSONのファイル名とパス、絶対/相対 パスのサポート。動作中に変更はできません。
-    "formation": bool           // "自動編成" を行うかどうか、オプション、デフォルトは false。動作中に変更はできません。
+    "enable": bool,               // このタスクを有効にするかどうか。任意、デフォルトは true。
+    "filename": string,           // 単一作業の JSON ファイルパス。必須（copilot_list と排他）。相対パス・絶対パスどちらも使用可能。
+    "copilot_list": [             // 作業リスト。必須（filename と排他）。filename と copilot_list が同時に存在する場合、copilot_list は無視されます；このパラメータが有効な場合、set_params は一度だけ実行可能。
+        {
+            "filename": string,   // 作業 JSON ファイルのパス。相対パス・絶対パスどちらも使用可能。
+            "stage_name": string, // ステージ名。[PRTS.Map](https://map.ark-nights.com) を参照。
+            "is_raid": bool       // 突襲モード（チャレンジモード）に切り替えるかどうか。任意、デフォルトは false。
+        },
+        ...
+    ],
+    "loop_times": int,            // ループ回数。任意、デフォルトは 1。単一作業モード（filename 指定時）のみ有効；このパラメータが有効な場合、set_params は一度だけ実行可能。
+    "use_sanity_potion": bool,    // 理性が不足した場合に理性回復剤を使用するかどうか。任意、デフォルトは false。
+    "formation": bool,            // 自動編成を行うかどうか。任意、デフォルトは false。
+    "formation_index": int,       // 自動編成で使用する編成スロット番号。任意、デフォルトは 0。
+                                  // 0〜4 の整数。0 は現在の編成、1〜4 はそれぞれ第1〜第4編成を意味します。
+    "user_additional": [          // カスタム追加オペレーターリスト。任意、デフォルトは []。formation が true の場合のみ有効。
+        {
+            "name": string,       // オペレーター名。任意、デフォルトは ""。空の場合は無視されます。
+            "skill": int          // 使用スキル。任意、デフォルトは 1。1〜3 の整数。範囲外の場合はゲーム内のデフォルトを使用。
+        },
+        ...
+    ],
+    "add_trust": bool,            // 自動編成時に信頼値の昇順で空き枠を自動補充するか。任意、デフォルトは false。formation が true の場合のみ有効。
+    "ignore_requirements": bool,  // 自動編成時にオペレーターの属性要件を無視するか。任意、デフォルトは false。formation が true の場合のみ有効。
+    "support_unit_usage": int,    // サポートオペレーターの使用モード。任意、デフォルトは 0。0〜3 の整数。formation が true の場合のみ有効。
+                                  //   0 - サポートオペレーターを使用しない。
+                                  //   1 - 欠員が1人のみの場合サポートで補う。欠員がなければ使用しない。
+                                  //   2 - 欠員が1人の場合サポートで補う。欠員がない場合は指定サポートを使用。
+                                  //   3 - 欠員が1人の場合サポートで補う。欠員がない場合はランダムサポートを使用。
+    "support_unit_name": string   // 指定サポートオペレーター名。任意、デフォルトは ""。support_unit_usage = 2 の場合のみ有効。
 }
 ```
 
 自動操縦JSONの詳細については、[自動戦闘API](./copilot-schema.md)を参照してください
 
 - `SSSCopilot`  
-  保全駐在の自動戦闘  
+  保全駐在の自動戦闘
 
 ```json5
 {
@@ -292,8 +337,19 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 
 保全駐在の自動操縦JSONの詳細については、[保全駐在API](./sss-schema.md)
 
+- `ParadoxCopilot`
+  逆理演算の自動戦闘
+
+```json5
+{
+   "enable": bool,        // このタスクを有効にするかどうか。デフォルトは true
+   "filename": string,    // 単一の作業 JSON ファイルパス、絶対パスと相対パスのどちらも可。実行時の設定には対応していません。list との二択（必須）
+   "list" : list<string>  // 作業 JSON のリスト、絶対パスと相対パスのどちらも可。実行時の設定には対応していません。filename との二択（必須）
+}
+```
+
 - `Depot`
-    倉庫アイテム認識
+  倉庫アイテム認識
 
 ```json5
 // 対応するタスクのパラメータ
@@ -303,7 +359,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `OperBox`  
-    カドレー識別  
+   カドレー識別
 
 ```json5
 // 対応するタスクのパラメータ
@@ -313,7 +369,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Reclamation`  
-    生息演算  
+   生息演算
 
 ```json5
 {
@@ -328,7 +384,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
     "tools_to_craft": [
         string,                 // 自動的に製造されるアイテム、オプション、デフォルトは螢光棒
         ...
-    ] 
+    ]
                                 // サブストリングを入力することをお勧めします
     "increment_mode": int,      // クリックタイプ、オプション、デフォルトは0
                                 // 0 - 連続クリック
@@ -338,7 +394,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `Custom`  
-  カスタム タスク  
+  カスタム タスク
 
 ```json5
 {
@@ -352,7 +408,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `SingleStep`  
-  シングル ステップ タスク（現在は戦闘でのみ利用可能）  
+  シングル ステップ タスク（現在は戦闘でのみ利用可能）
 
 ```json5
 {
@@ -370,7 +426,7 @@ TaskId ASSTAPI AsstAppendTask(AsstHandle handle, const char* type, const char* p
 ```
 
 - `VideoRecognition`  
-  ビデオ認識、現在は作戦ビデオのみ対応  
+  ビデオ認識、現在は作戦ビデオのみ対応
 
 ```json5
 {
@@ -394,17 +450,17 @@ bool ASSTAPI AsstSetTaskParams(AsstHandle handle, TaskId id, const char* params)
 #### Return Value
 
 - `bool`  
-    パラメータが正常に設定されたかどうか。  
+   パラメータが正常に設定されたかどうか。
 
 #### Parameter Description
 
 - `AsstHandle handle`  
-    Instance handle
+   Instance handle
 - `TaskId task`  
-    Task ID, `AsstAppendTask` の値を返します
+   Task ID, `AsstAppendTask` の値を返します
 - `const char* params`  
-    JSONのタスクパラメーター, `AsstAppendTask` と同じ  
-    "動作中に変更はできません" と記載されていないフィールドはランタイム中に変更することができます. そうでなければ、タスクの実行中にこれらの変更は無視される.
+   JSONのタスクパラメーター, `AsstAppendTask` と同じ  
+   "動作中に変更はできません" と記載されていないフィールドはランタイム中に変更することができます. そうでなければ、タスクの実行中にこれらの変更は無視される.
 
 ### `AsstSetStaticOption`
 
@@ -421,14 +477,14 @@ bool ASSTAPI AsstSetStaticOption(AsstStaticOptionKey key, const char* value);
 #### Return Value
 
 - `bool`  
-    設定が成功したかどうか
+   設定が成功したかどうか
 
 #### Parameter Description
 
 - `AsstStaticOptionKey key`  
-    key
+   key
 - `const char* value`  
-    value
+   value
 
 ##### List of Key and value
 
@@ -449,16 +505,16 @@ bool ASSTAPI AsstSetInstanceOption(AsstHandle handle, AsstInstanceOptionKey key,
 #### Return Value
 
 - `bool`  
-    設定が成功したかどうか
+   設定が成功したかどうか
 
 #### Parameter Description
 
 - `AsstHandle handle`  
-    handle
+   handle
 - `AsstInstanceOptionKey key`  
-    key
+   key
 - `const char* value`  
-    value
+   value
 
 ##### List of Key and value
 

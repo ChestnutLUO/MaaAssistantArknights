@@ -1,6 +1,6 @@
 // <copyright file="QmsgNotificationProvider.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -16,85 +16,76 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using MaaWpfGui.Helper;
 using MaaWpfGui.Services.Web;
 using MaaWpfGui.ViewModels.UI;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace MaaWpfGui.Services.Notification
+namespace MaaWpfGui.Services.Notification;
+
+public class QmsgNotificationProvider(IHttpService httpService) : IExternalNotificationProvider
 {
-    public class QmsgNotificationProvider : IExternalNotificationProvider
+    private readonly ILogger _logger = Log.ForContext<QmsgNotificationProvider>();
+
+    public async Task<bool> SendAsync(string title, string content)
     {
-        private readonly IHttpService _httpService;
+        var server = SettingsViewModel.ExternalNotificationSettings.QmsgServer;
+        var key = SettingsViewModel.ExternalNotificationSettings.QmsgKey;
+        var receiveUser = SettingsViewModel.ExternalNotificationSettings.QmsgUser;
+        var sendBot = SettingsViewModel.ExternalNotificationSettings.QmsgBot;
 
-        private readonly ILogger _logger = Log.ForContext<QmsgNotificationProvider>();
+        var uri = $"{server}/jsend/{key}";
 
-        public QmsgNotificationProvider(IHttpService httpService)
+        var response = await httpService.PostAsJsonAsync(
+            new Uri(uri),
+            new QmsgContent { Msg = content, Qq = receiveUser, Bot = sendBot, });
+
+        if (string.IsNullOrEmpty(response))
         {
-            _httpService = httpService;
+            _logger.Warning("Failed to send Qmsg notification");
+            return false;
         }
 
-        public async Task<bool> SendAsync(string title, string content)
+        var responseRoot = JsonDocument.Parse(response).RootElement;
+        var hasCodeProperty = responseRoot.TryGetProperty("success", out var codeElement);
+        if (hasCodeProperty is false)
         {
-            var server = SettingsViewModel.ExternalNotificationSettings.QmsgServer;
-            var key = SettingsViewModel.ExternalNotificationSettings.QmsgKey;
-            var receiveUser = SettingsViewModel.ExternalNotificationSettings.QmsgUser;
-            var sendBot = SettingsViewModel.ExternalNotificationSettings.QmsgBot;
-
-            var uri = $"{server}/jsend/{key}";
-
-            var response = await _httpService.PostAsJsonAsync(
-                new Uri(uri),
-                new QmsgContent { Msg = content, Qq = receiveUser, Bot = sendBot, });
-
-            if (string.IsNullOrEmpty(response))
-            {
-                _logger.Warning("Failed to send Qmsg notification");
-                return false;
-            }
-
-            var responseRoot = JsonDocument.Parse(response).RootElement;
-            var hasCodeProperty = responseRoot.TryGetProperty("success", out var codeElement);
-            if (hasCodeProperty is false)
-            {
-                _logger.Warning("Failed to send Qmsg notification, unknown response, {Response}", response);
-                return false;
-            }
-
-            var success = codeElement.GetBoolean();
-            switch (success)
-            {
-                case false:
-                    _logger.Warning("Failed to send Qmsg notification, unknown response {Response}", response);
-                    return false;
-                case true:
-                    return true;
-            }
+            _logger.Warning("Failed to send Qmsg notification, unknown response, {Response}", response);
+            return false;
         }
 
-        private class QmsgContent
+        var success = codeElement.GetBoolean();
+        switch (success)
         {
-            // 消息内容
-            // ReSharper disable UnusedAutoPropertyAccessor.Local
-            [JsonPropertyName("msg")]
-            public string Msg { get; set; }
+            case false:
+                _logger.Warning("Failed to send Qmsg notification, unknown response {Response}", response);
+                return false;
+            case true:
+                return true;
+        }
+    }
 
-            [JsonPropertyName("qq")]
-            public string Qq { get; set; }
+    private class QmsgContent
+    {
+        // 消息内容
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        [JsonPropertyName("msg")]
+        public string Msg { get; set; }
 
-            [JsonPropertyName("bot")]
-            public string Bot { get; set; }
+        [JsonPropertyName("qq")]
+        public string Qq { get; set; }
 
-            /// <summary>
-            /// 转换为Dictionary
-            /// </summary>
-            public Dictionary<string, string> ToDictionary()
-            {
-                var objstr = JsonConvert.SerializeObject(this);
-                var map = JsonConvert.DeserializeObject<Dictionary<string, string>>(objstr);
-                return map;
-            }
+        [JsonPropertyName("bot")]
+        public string Bot { get; set; }
+
+        /// <summary>
+        /// 转换为Dictionary
+        /// </summary>
+        public Dictionary<string, string> ToDictionary()
+        {
+            var objstr = JsonConvert.SerializeObject(this);
+            var map = JsonConvert.DeserializeObject<Dictionary<string, string>>(objstr);
+            return map;
         }
     }
 }

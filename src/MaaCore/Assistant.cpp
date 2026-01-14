@@ -1,8 +1,8 @@
 #include "Assistant.h"
 
-#include "Utils/NoWarningCV.h"
-#include "Utils/Ranges.hpp"
+#include "MaaUtils/NoWarningCV.hpp"
 #include <meojson/json.hpp>
+#include <ranges>
 
 #include "Config/GeneralConfig.h"
 #include "Config/Miscellaneous/OcrPack.h"
@@ -19,6 +19,7 @@
 #include "Task/Interface/InfrastTask.h"
 #include "Task/Interface/MallTask.h"
 #include "Task/Interface/OperBoxTask.h"
+#include "Task/Interface/ParadoxCopilotTask.h"
 #include "Task/Interface/ReclamationTask.h"
 #include "Task/Interface/RecruitTask.h"
 #include "Task/Interface/RoguelikeTask.h"
@@ -232,6 +233,7 @@ asst::Assistant::TaskId asst::Assistant::append_task(const std::string& type, co
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(RoguelikeTask)
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(CopilotTask)
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(SSSCopilotTask)
+    ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(ParadoxCopilotTask)
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(SingleStepTask)
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(VideoRecognitionTask)
     ASST_ASSISTANT_APPEND_TASK_FROM_STRING_IF_BRANCH(DepotTask)
@@ -307,6 +309,22 @@ std::vector<uchar> asst::Assistant::get_image() const
     return buf;
 }
 
+std::vector<uchar> asst::Assistant::get_image_bgr() const
+{
+    if (!inited()) {
+        return {};
+    }
+
+    cv::Mat img = m_ctrler->get_image_cache();
+
+    if (!img.isContinuous()) {
+        img = img.clone();
+    }
+
+    std::vector<uchar> buf(img.data, img.data + img.total() * img.elemSize());
+    return buf;
+}
+
 bool asst::Assistant::connect(const std::string& adb_path, const std::string& address, const std::string& config)
 {
     LogTraceFunction;
@@ -356,7 +374,7 @@ std::vector<Assistant::TaskId> asst::Assistant::get_tasks_list() const
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     std::vector<TaskId> result(m_tasks_list.size());
-    ranges::copy(m_tasks_list | views::keys, result.begin());
+    std::ranges::copy(m_tasks_list | std::views::keys, result.begin());
     return result;
 }
 

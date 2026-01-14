@@ -36,7 +36,8 @@ public:
         bool extra_swipe = false,
         double slope_in = 1,
         double slope_out = 1,
-        bool with_pause = false);
+        bool with_pause = false,
+        bool high_resolution_swipe_fix = false);
     bool swipe(
         const Rect& r1,
         const Rect& r2,
@@ -44,7 +45,8 @@ public:
         bool extra_swipe = false,
         double slope_in = 1,
         double slope_out = 1,
-        bool with_pause = false);
+        bool with_pause = false,
+        bool high_resolution_swipe_fix = false);
 
     bool inject_input_event(InputEvent event);
 
@@ -59,7 +61,7 @@ private:
     ControllerType m_controller_type = ControllerType::Minitouch;
     ProxyCallback m_callback = nullptr;
 
-    std::minstd_rand m_rand_engine;
+    std::mt19937 m_rand_engine;
 
     std::pair<int, int> m_scale_size = { WindowWidthDefault, WindowHeightDefault };
     double m_control_scale = 1.0;

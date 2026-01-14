@@ -39,8 +39,8 @@ icon: mdi:plug
 #### 模擬器相關文件及參考埠
 
 - [Bluestacks 5](https://support.bluestacks.com/hc/zh-tw/articles/360061342631-%E5%A6%82%E4%BD%95%E5%B0%87%E6%82%A8%E7%9A%84%E6%87%89%E7%94%A8%E5%BE%9EBlueStacks-4%E8%BD%89%E7%A7%BB%E5%88%B0BlueStacks-5#%E2%80%9C2%E2%80%9D) `5555`
+- [MuMu](https://mumu.163.com/help/20240807/40912_1073151.html?maa) `16384`
 - [MuMu Pro](https://mumu.163.com/mac/function/20240126/40028_1134600.html) `16384`
-- [MuMu 12](https://mumu.163.com/help/20230214/35047_1073151.html) `16384`
 - [逍遙](https://bbs.xyaz.cn/forum.php?mod=viewthread&tid=365537) `21503`
 - [夜神](https://support.yeshen.com/zh-CN/qt/ml) `62001`
 
@@ -48,14 +48,13 @@ icon: mdi:plug
 
 #### 獲取多開埠
 
-- MuMu 12 多開器右上角可檢視正在執行的多開埠。
+- MuMu 多開器右上角可檢視正在執行的多開埠。
 - Bluestacks 5 模擬器設定內可檢視當前的多開埠。
 - _待補充_
 
 ::: details 備選方案
 
 - 方案 1 : 使用 ADB 命令檢視模擬器埠
-
   1. 啟動**一個**模擬器，並確保沒有其他安卓裝置連接在此電腦上。
   2. 在存放有 ADB 可執行檔案的資料夾中啟動終端。
   3. 執行以下命令。
@@ -78,7 +77,6 @@ icon: mdi:plug
   使用 `127.0.0.1:<埠>` 或 `emulator-<四位數字>` 作為連接地址。
 
 - 方案 2 : 查詢已建立的 ADB 連接
-
   1. 執行方案 1。
   2. 按下 `Win+S` 開啟搜尋欄，輸入 `資源監視器` 並開啟。
   3. 切換到 `網路` 索引標籤，在 `接聽連接埠` 的名稱列中查詢模擬器程式名，如 `HD-Player.exe`。
@@ -123,9 +121,10 @@ MAA 現在會嘗試從登錄檔中讀取 `bluestacks.conf` 的儲存位置，當
 :::
 
 1. 在藍疊模擬器的資料目錄下找到 `bluestacks.conf` 這個檔案
-
    - 國際版預設路徑為 `C:\ProgramData\BlueStacks_nxt\bluestacks.conf`
    - 中國版預設路徑為 `C:\ProgramData\BlueStacks_nxt_cn\bluestacks.conf`
+
+   注：`C:\ProgramData`為隱藏目錄，必要時請在檔案資源管理器的地址欄中直接貼上該地址，以便進入目錄並進行尋找。
 
 2. 如果是第一次使用，請執行一次 MAA，使 MAA 自動生成配置檔案。
 
@@ -151,15 +150,15 @@ MAA 現在會嘗試從登錄檔中讀取 `bluestacks.conf` 的儲存位置，當
 
 需選擇對應模擬器的配置，若列表中沒有則選擇通用配置。若通用配置不可用，請嘗試並選擇其他任一可用的配置。
 
-具體區別可以閱讀[原始碼](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/resource/config.json#L65)。
+具體區別可以閱讀[原始碼](https://github.com/MaaAssistantArknights/MaaAssistantArknights/blob/dev/resource/config.json#L57)。
 
 ### MuMu 截圖增強模式
 
-需使用中國版或方舟專版 MuMu 12 V4.0.0 及更新版本。國際版等暫不支援。<!-- V3.8.13 -->
+需使用官版或方舟專版的 MuMu V4.1.26 及更新版本。
 
 1. `設定` - `連接設定`，勾選 `啟用 MuMu 截圖增強模式`，MAA 會在勾選開關時嘗試通過註冊表自動填寫安裝路徑。
 
-2. `MuMu 安裝路徑` 填寫 `MuMuPlayer-12.0` 或 `YXArkNights-12.0` 資料夾的路徑，如 `C:\Program Files\Netease\MuMuPlayer-12.0`。
+2. `MuMu 安裝路徑` 填寫 `MuMu Player` 或 `MuMuPlayerGlobal-12.0` 或 `YXArkNights-12.0` 資料夾的路徑，如 `C:\Program Files\Netease\MuMuPlayerGlobal-12.0`。
 
 3. 若正在使用 MuMu 網絡橋接，則需勾選 `MuMu 網絡橋接模式` 後手動填寫 MuMu 多開器內對應模擬器的序號，如主多開為 `0`。
 

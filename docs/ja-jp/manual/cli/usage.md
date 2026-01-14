@@ -11,6 +11,12 @@ This page is outdated and maybe still in Simplified Chinese. Translation is need
 
 maa-cli 主要功能是通过调用 MaaCore，自动化完成明日方舟的游戏任务。此外，为了方便使用，maa-cli 还提供了管理 MaaCore 的功能。
 
+::: tip
+
+对于使用 Windows 包管理器 (winget) 安装 maa-cli 的用户，以下命令中的 `maa` 需要替换为 `maa-cli` 。
+
+:::
+
 ## 管理 MaaCore
 
 maa-cli 可以安装和更新 MaaCore 及资源，只需运行以下命令：
@@ -53,7 +59,7 @@ maa init
 - `maa fight [stage]`: 运行战斗任务，`[stage]` 是关卡名称，例如 `1-7`；留空选择上次或者当前关卡。
 - `maa copilot <maa_uri>...`: 自动抄作业，其中 `<maa_uri>` 是作业的 URI，多个 URI 会依次执行，`maa_uri` 可以是 `maa://1234` 或者 本地文件路径 `./1234.json`。
 - `maa sscopilot <maa_uri>`: 自动保全派驻，其中 `<maa_uri>` 是保全派驻作业的 URI。
-- `maa roguelike <theme>`: 自动集成战略，`<theme>` 是集成战略的主题，可选值为 `Phantom`，`Mizuki`，`Sami` 以及 `Sarkaz`。
+- `maa roguelike <theme>`: 自动集成战略，`<theme>` 是集成战略的主题，可选值为 `Phantom`，`Mizuki`，`Sami`，`Sarkaz` 以及 `JieGarden`。
 - `maa reclamation <theme>`: 自动生息演算，`<theme>` 是生息演算的主题，目前仅 `Tales` 主题可用。
 
 上述任务接受一些参数，你可以通过 `maa <task> --help` 来查看具体的参数。

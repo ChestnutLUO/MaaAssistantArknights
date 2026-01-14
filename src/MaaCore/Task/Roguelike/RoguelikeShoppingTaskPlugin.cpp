@@ -1,5 +1,7 @@
 #include "RoguelikeShoppingTaskPlugin.h"
 
+#include <array>
+
 #include "Config/Miscellaneous/BattleDataConfig.h"
 #include "Config/Roguelike/RoguelikeShoppingConfig.h"
 #include "Config/TaskData.h"
@@ -34,11 +36,20 @@ bool asst::RoguelikeShoppingTaskPlugin::_run()
     buy_once();
     const auto& theme = m_config->get_theme();
     if ((theme == RoguelikeTheme::Sami || theme == RoguelikeTheme::Sarkaz) &&
+        // 界园可能没有免费刷新，先不进这里
         m_config->get_mode() == RoguelikeMode::Exp) {
         // 点击刷新
-        ProcessTask(*this, { theme + "@Roguelike@StageTraderRefresh" }).run();
-        buy_once();
+        sleep(500);
+        bool ret = ProcessTask(*this, { theme + "@Roguelike@StageTraderRefresh" }).run();
+        ret = ret && ProcessTask(*this, { theme + "@Roguelike@StageTraderRefreshConfirm" })
+                         .set_retry_times(RetryTimesDefault)
+                         .run();
+        if (ret) {
+            buy_once();
+        }
     }
+
+    sleep(1000);
 
     return true;
 }
@@ -57,7 +68,7 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
     bool no_longer_buy = m_config->status().trader_no_longer_buy;
 
     std::unordered_map<battle::Role, size_t> map_roles_count;
-    std::unordered_map<battle::Role, size_t> map_wait_promotion;
+    std::unordered_map<battle::Role, std::array<size_t, 6>> map_wait_promotion;
     size_t total_wait_promotion = 0;
     std::unordered_set<std::string> chars_list;
     for (const auto& [name, oper] : m_config->status().opers) {
@@ -78,9 +89,9 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
             map_roles_count[battle::Role::Medic] += 1;
             if (elite == 1 && level == 70) {
                 total_wait_promotion += 1;
-                map_wait_promotion[battle::Role::Caster] += 1;
-                map_wait_promotion[battle::Role::Warrior] += 1;
-                map_wait_promotion[battle::Role::Medic] += 1;
+                map_wait_promotion[battle::Role::Caster][5 - 1] += 1;
+                map_wait_promotion[battle::Role::Warrior][5 - 1] += 1;
+                map_wait_promotion[battle::Role::Medic][5 - 1] += 1;
             }
         }
         else {
@@ -93,7 +104,7 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
             int rarity = BattleData.get_rarity(name);
             if (elite == 1 && level >= RarityPromotionLevel.at(rarity)) {
                 total_wait_promotion += 1;
-                map_wait_promotion[role] += 1;
+                map_wait_promotion[role][rarity - 1] += 1;
             }
         }
     }
@@ -128,7 +139,7 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
             continue;
         }
 
-        auto find_it = ranges::find_if(result, [&](const TextRect& tr) -> bool {
+        auto find_it = std::ranges::find_if(result, [&](const TextRect& tr) -> bool {
             return tr.text.find(goods.name) != std::string::npos || goods.name.find(tr.text) != std::string::npos;
         });
         if (find_it == result.cend()) {
@@ -157,7 +168,11 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
             if (!goods.roles.empty()) {
                 bool role_matched = false;
                 for (const auto& role : goods.roles) {
-                    if (map_wait_promotion[role] != 0) {
+                    size_t sum_wait_promotion = 0;
+                    for (int rarity = 0; rarity < goods.promotion_rarity; ++rarity) {
+                        sum_wait_promotion += map_wait_promotion[role][rarity];
+                    }
+                    if (sum_wait_promotion != 0) {
                         role_matched = true;
                         break;
                     }
@@ -167,10 +182,22 @@ bool asst::RoguelikeShoppingTaskPlugin::buy_once()
                     continue;
                 }
             }
+            else {
+                size_t sum_wait_promotion = 0;
+                for (const auto& [role, arr] : map_wait_promotion) {
+                    for (int rarity = 0; rarity < goods.promotion_rarity; ++rarity) {
+                        sum_wait_promotion += arr[rarity];
+                    }
+                }
+                if (sum_wait_promotion == 0) {
+                    Log.trace("Ready to buy", goods.name, ", but there is no one waiting for promotion, skip");
+                    continue;
+                }
+            }
         }
 
         if (!goods.chars.empty()) {
-            if (ranges::find_first_of(chars_list, goods.chars) == chars_list.cend()) {
+            if (std::ranges::find_first_of(chars_list, goods.chars) == chars_list.cend()) {
                 Log.trace("Ready to buy", goods.name, ", but there is no such character, skip");
                 continue;
             }

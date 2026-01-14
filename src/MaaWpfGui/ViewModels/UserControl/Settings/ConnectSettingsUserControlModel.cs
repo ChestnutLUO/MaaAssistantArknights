@@ -1,6 +1,6 @@
 // <copyright file="ConnectSettingsUserControlModel.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using JetBrains.Annotations;
 using MaaWpfGui.Constants;
 using MaaWpfGui.Helper;
 using MaaWpfGui.Main;
@@ -37,6 +38,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Stylet;
 using Window = HandyControl.Controls.Window;
+using WindowManager = MaaWpfGui.Helper.WindowManager;
 
 namespace MaaWpfGui.ViewModels.UserControl.Settings;
 
@@ -88,8 +90,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool AutoDetectConnection
     {
         get => _autoDetectConnection;
-        set
-        {
+        set {
             if (!SetAndNotify(ref _autoDetectConnection, value))
             {
                 return;
@@ -109,8 +110,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool AlwaysAutoDetectConnection
     {
         get => _alwaysAutoDetectConnection;
-        set
-        {
+        set {
             SetAndNotify(ref _alwaysAutoDetectConnection, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.AlwaysAutoDetect, value.ToString());
         }
@@ -132,8 +132,14 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public string ConnectAddress
     {
         get => _connectAddress;
-        set
-        {
+        set {
+            value = value
+                .Replace(" ", string.Empty)
+                .Replace("：", ":")
+                .Replace(";", ":")
+                .Replace("；", ":")
+                .Trim();
+
             if (ConnectAddress == value)
             {
                 return;
@@ -171,7 +177,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     }
 
     // UI 绑定的方法
-    // ReSharper disable once UnusedMember.Global
+    [UsedImplicitly]
     public void RemoveAddressClick(string address)
     {
         ConnectAddressHistory.Remove(address);
@@ -186,8 +192,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public string AdbPath
     {
         get => _adbPath;
-        set
-        {
+        set {
             if (!Path.GetFileName(value).ToLower().Contains("adb"))
             {
                 var count = 3;
@@ -222,8 +227,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public string ConnectConfig
     {
         get => _connectConfig;
-        set
-        {
+        set {
             Instances.AsstProxy.Connected = false;
             SetAndNotify(ref _connectConfig, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.ConnectConfig, value);
@@ -250,8 +254,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public bool Enable
         {
             get => _enable;
-            set
-            {
+            set {
                 if (!SetAndNotify(ref _enable, value))
                 {
                     return;
@@ -259,48 +262,92 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
 
                 if (value)
                 {
-                    MessageBoxHelper.Show(LocalizationHelper.GetString("MuMu12ExtrasEnabledTip"));
-
-                    // 读取mumu注册表地址 并填充GUI
-                    if (string.IsNullOrEmpty(EmulatorPath))
-                    {
-                        try
-                        {
-                            const string UninstallKeyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MuMuPlayer-12.0";
-                            const string UninstallExeName = @"\uninstall.exe";
-
-                            using var driverKey = Registry.LocalMachine.OpenSubKey(UninstallKeyPath);
-                            if (driverKey == null)
-                            {
-                                EmulatorPath = string.Empty;
-                                return;
-                            }
-
-                            var uninstallString = driverKey.GetValue("UninstallString") as string;
-
-                            if (string.IsNullOrEmpty(uninstallString) || !uninstallString.Contains(UninstallExeName))
-                            {
-                                EmulatorPath = string.Empty;
-                                return;
-                            }
-
-                            var match = Regex.Match(uninstallString,
-                                $"""
-                                     ^"(.*?){Regex.Escape(UninstallExeName)}
-                                     """,
-                                RegexOptions.IgnoreCase);
-                            EmulatorPath = match.Success ? match.Groups[1].Value : string.Empty;
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.Warning($"An error occurred: {e.Message}");
-                            EmulatorPath = string.Empty;
-                        }
-                    }
+                    AutoDetectEmulatorPath();
                 }
 
                 Instances.AsstProxy.Connected = false;
                 ConfigurationHelper.SetValue(ConfigurationKeys.MuMu12ExtrasEnabled, value.ToString());
+            }
+        }
+
+        private void AutoDetectEmulatorPath()
+        {
+            MessageBoxHelper.Show(LocalizationHelper.GetString("MuMu12ExtrasEnabledTip"));
+
+            // 读取mumu注册表地址 并填充GUI
+            if (!string.IsNullOrEmpty(EmulatorPath))
+            {
+                return;
+            }
+
+            try
+            {
+                string[] possibleUninstallKeys =
+                [
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MuMuPlayer-12.0",
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MuMuPlayer",
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MuMuPlayerGlobal-12.0",
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YXArkNights-12.0",
+                ];
+
+                const string UninstallExeName = @"\uninstall.exe";
+                var detectedPaths = new List<string>();
+
+                foreach (var keyPath in possibleUninstallKeys)
+                {
+                    using var driverKey = Registry.LocalMachine.OpenSubKey(keyPath);
+                    if (driverKey == null)
+                    {
+                        continue;
+                    }
+
+                    var uninstallString = driverKey.GetValue("UninstallString") as string;
+                    if (string.IsNullOrEmpty(uninstallString) || !uninstallString.Contains(UninstallExeName))
+                    {
+                        continue;
+                    }
+
+                    var match = Regex.Match(uninstallString,
+                        $"""
+                         ^"(.*?){Regex.Escape(UninstallExeName)}
+                         """,
+                        RegexOptions.IgnoreCase);
+
+                    if (match.Success && Directory.Exists(match.Groups[1].Value))
+                    {
+                        var path = match.Groups[1].Value;
+                        if (!detectedPaths.Contains(path))
+                        {
+                            detectedPaths.Add(path);
+                        }
+                    }
+                }
+
+                if (detectedPaths.Count == 0)
+                {
+                    EmulatorPath = string.Empty;
+                    return;
+                }
+
+                if (detectedPaths.Count == 1)
+                {
+                    EmulatorPath = detectedPaths[0];
+                    return;
+                }
+
+                // 多个路径，弹出选择框
+                var selectionWindow = new Views.Dialogs.EmulatorPathSelectionDialogView(detectedPaths) {
+                    Owner = Application.Current.MainWindow,
+                };
+                if (selectionWindow.ShowDialog() == true && !string.IsNullOrEmpty(selectionWindow.SelectedPath))
+                {
+                    EmulatorPath = selectionWindow.SelectedPath;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Warning("An error occurred: {EMessage}", e.Message);
+                EmulatorPath = string.Empty;
             }
         }
 
@@ -313,12 +360,26 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public string EmulatorPath
         {
             get => _emulatorPath;
-            set
-            {
+            set {
                 if (_enable && !string.IsNullOrEmpty(value) && !Directory.Exists(value))
                 {
-                    MessageBoxHelper.Show("MuMu Emulator 12 Path Not Found");
-                    value = string.Empty;
+                    MessageBoxHelper.Show(LocalizationHelper.GetString("MuMuEmulatorPathNotFound"));
+                    MessageBoxHelper.Show(LocalizationHelper.GetString("MuMu12ExtrasEnabledTip"));
+                    return;
+                }
+
+                // 当路径存在时，检查 external_renderer_ipc.dll 是否可用（兼容 MuMu 5/12 路径）
+                if (!string.IsNullOrEmpty(value) && Directory.Exists(value))
+                {
+                    var dllPath1 = Path.Combine(value, "nx_device", "12.0", "shell", "sdk", "external_renderer_ipc.dll");
+                    var dllPath2 = Path.Combine(value, "shell", "sdk", "external_renderer_ipc.dll");
+
+                    if (!File.Exists(dllPath1) && !File.Exists(dllPath2))
+                    {
+                        MessageBoxHelper.Show(LocalizationHelper.GetString("MuMuExternalRendererMissing"));
+                        MessageBoxHelper.Show(LocalizationHelper.GetString("MuMu12ExtrasEnabledTip"));
+                        return;
+                    }
                 }
 
                 Instances.AsstProxy.Connected = false;
@@ -332,8 +393,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public bool MuMuBridgeConnection
         {
             get => _mumuBridgeConnection;
-            set
-            {
+            set {
                 if (_mumuBridgeConnection == value)
                 {
                     return;
@@ -341,8 +401,13 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
 
                 if (value)
                 {
-                    var result = MessageBoxHelper.Show(LocalizationHelper.GetString("MuMuBridgeConnectionTip"), icon: MessageBoxImage.Information, buttons: MessageBoxButton.OKCancel);
-                    if (result != MessageBoxResult.OK)
+                    var result = MessageBoxHelper.Show(
+                        LocalizationHelper.GetString("MuMuBridgeConnectionTip"),
+                        icon: MessageBoxImage.Warning,
+                        buttons: MessageBoxButton.YesNo,
+                        no: LocalizationHelper.GetString("Confirm"),
+                        yes: LocalizationHelper.GetString("Cancel"));
+                    if (result != MessageBoxResult.No)
                     {
                         return;
                     }
@@ -363,8 +428,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public string Index
         {
             get => _index;
-            set
-            {
+            set {
                 Instances.AsstProxy.Connected = false;
                 SetAndNotify(ref _index, value);
                 ConfigurationHelper.SetValue(ConfigurationKeys.MuMu12Index, value);
@@ -373,15 +437,13 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
 
         public string Config
         {
-            get
-            {
+            get {
                 if (!Enable)
                 {
                     return JsonConvert.SerializeObject(new JObject());
                 }
 
-                var configObject = new JObject
-                {
+                var configObject = new JObject {
                     ["path"] = EmulatorPath,
                 };
 
@@ -404,8 +466,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public bool Enable
         {
             get => _enable;
-            set
-            {
+            set {
                 if (!SetAndNotify(ref _enable, value))
                 {
                     return;
@@ -413,43 +474,76 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
 
                 if (value)
                 {
-                    MessageBoxHelper.Show(LocalizationHelper.GetString("LdExtrasEnabledTip"));
-
-                    // 读取 LD 注册表地址 并填充GUI
-                    if (string.IsNullOrEmpty(EmulatorPath))
-                    {
-                        try
-                        {
-                            const string UninstallKeyPath = @"Software\leidian\ldplayer9";
-                            const string InstallDirValueName = "InstallDir";
-
-                            using var driverKey = Registry.CurrentUser.OpenSubKey(UninstallKeyPath);
-                            if (driverKey == null)
-                            {
-                                EmulatorPath = string.Empty;
-                                return;
-                            }
-
-                            var installDir = driverKey.GetValue(InstallDirValueName) as string;
-
-                            if (string.IsNullOrEmpty(installDir))
-                            {
-                                EmulatorPath = string.Empty;
-                                return;
-                            }
-
-                            EmulatorPath = installDir;
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.Warning($"An error occurred: {e.Message}");
-                            EmulatorPath = string.Empty;
-                        }
-                    }
+                    AutoDetectEmulatorPath();
                 }
 
                 Instances.AsstProxy.Connected = false;
                 ConfigurationHelper.SetValue(ConfigurationKeys.LdPlayerExtrasEnabled, value.ToString());
+            }
+        }
+
+        private void AutoDetectEmulatorPath()
+        {
+            MessageBoxHelper.Show(LocalizationHelper.GetString("LdExtrasEnabledTip"));
+
+            // 读取 LD 注册表地址 并填充GUI
+            if (!string.IsNullOrEmpty(EmulatorPath))
+            {
+                return;
+            }
+
+            try
+            {
+                string[] possiblePaths =
+                [
+                    @"Software\leidian\ldplayer9", // 原版路径优先
+                    @"Software\mrfz\mrfz"
+                ];
+
+                const string InstallDirValueName = "InstallDir";
+                var detectedPaths = new List<string>();
+
+                foreach (var regPath in possiblePaths)
+                {
+                    using var driverKey = Registry.CurrentUser.OpenSubKey(regPath);
+                    if (driverKey == null)
+                    {
+                        continue;
+                    }
+
+                    var installDir = driverKey.GetValue(InstallDirValueName) as string;
+                    if (!string.IsNullOrEmpty(installDir) && Directory.Exists(installDir))
+                    {
+                        if (!detectedPaths.Contains(installDir))
+                        {
+                            detectedPaths.Add(installDir);
+                        }
+                    }
+                }
+
+                if (detectedPaths.Count == 0)
+                {
+                    EmulatorPath = string.Empty;
+                    return;
+                }
+
+                if (detectedPaths.Count == 1)
+                {
+                    EmulatorPath = detectedPaths[0];
+                    return;
+                }
+
+                // 多个路径，弹出选择框
+                var selectionWindow = new Views.Dialogs.EmulatorPathSelectionDialogView(detectedPaths);
+                if (selectionWindow.ShowDialog() == true && !string.IsNullOrEmpty(selectionWindow.SelectedPath))
+                {
+                    EmulatorPath = selectionWindow.SelectedPath;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Warning("An error occurred: {EMessage}", e.Message);
+                EmulatorPath = string.Empty;
             }
         }
 
@@ -462,17 +556,51 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public string EmulatorPath
         {
             get => _emulatorPath;
-            set
-            {
+            set {
                 if (_enable && !string.IsNullOrEmpty(value) && !Directory.Exists(value))
                 {
-                    MessageBoxHelper.Show("LD Emulator Path Not Found");
-                    value = string.Empty;
+                    MessageBoxHelper.Show(LocalizationHelper.GetString("LdPlayerEmulatorPathNotFound"));
+                    MessageBoxHelper.Show(LocalizationHelper.GetString("LdExtrasEnabledTip"));
+                    return;
+                }
+
+                // 当路径存在时，检查 ldopengl64.dll 是否存在
+                if (!string.IsNullOrEmpty(value) && Directory.Exists(value))
+                {
+                    var libPath = Path.Combine(value, "ldopengl64.dll");
+                    if (!File.Exists(libPath))
+                    {
+                        MessageBoxHelper.Show(LocalizationHelper.GetString("LdPlayerOpenglMissing"));
+                        MessageBoxHelper.Show(LocalizationHelper.GetString("LdExtrasEnabledTip"));
+                        return;
+                    }
                 }
 
                 Instances.AsstProxy.Connected = false;
                 SetAndNotify(ref _emulatorPath, value);
                 ConfigurationHelper.SetValue(ConfigurationKeys.LdPlayerEmulatorPath, value);
+            }
+        }
+
+        private bool _manualSetIndex = Convert.ToBoolean(ConfigurationHelper.GetValue(ConfigurationKeys.LdPlayerManualSetIndex, bool.FalseString));
+
+        public bool ManualSetIndex
+        {
+            get => _manualSetIndex;
+            set {
+                if (_manualSetIndex == value)
+                {
+                    return;
+                }
+
+                if (value)
+                {
+                    Index = GetEmulatorIndex(SettingsViewModel.ConnectSettings.ConnectAddress).ToString();
+                }
+
+                SetAndNotify(ref _manualSetIndex, value);
+                Instances.AsstProxy.Connected = false;
+                ConfigurationHelper.SetValue(ConfigurationKeys.LdPlayerManualSetIndex, value.ToString());
             }
         }
 
@@ -484,8 +612,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         public string Index
         {
             get => _index;
-            set
-            {
+            set {
                 Instances.AsstProxy.Connected = false;
                 SetAndNotify(ref _index, value);
                 ConfigurationHelper.SetValue(ConfigurationKeys.LdPlayerIndex, value);
@@ -497,12 +624,10 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
             var emulatorPath = $@"{EmulatorPath}\ldconsole.exe";
             if (!File.Exists(emulatorPath))
             {
-                MessageBoxHelper.Show("LD Emulator Path Not Found");
                 return 0;
             }
 
-            var startInfo = new ProcessStartInfo
-            {
+            var startInfo = new ProcessStartInfo {
                 FileName = emulatorPath,
                 Arguments = "list2",
                 RedirectStandardOutput = true,
@@ -545,21 +670,53 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
             return 0;
         }
 
+        private static int GetEmulatorIndex(string address)
+        {
+            int index = 0;
+            if (string.IsNullOrEmpty(address))
+            {
+                return index;
+            }
+
+            const int BaseEmulatorPort = 5554;
+            const int BaseAdbPort = 5555;
+
+            if (address.StartsWith("emulator-") && int.TryParse(address[9..], out int port))
+            {
+                index = (port - BaseEmulatorPort) / 2;
+            }
+            else if (address.StartsWith("127.0.0.1:") && int.TryParse(address[10..], out int port2))
+            {
+                index = (port2 - BaseAdbPort) / 2;
+            }
+
+            return index;
+        }
+
         public string Config
         {
-            get
-            {
+            get {
                 if (!Enable)
                 {
                     return JsonConvert.SerializeObject(new JObject());
                 }
 
-                var configObject = new JObject
+                int index;
+                if (ManualSetIndex)
                 {
+                    index = int.TryParse(Index, out var indexParse) ? indexParse : 0;
+                }
+                else
+                {
+                    index = GetEmulatorIndex(SettingsViewModel.ConnectSettings.ConnectAddress);
+                }
+
+                var configObject = new JObject {
                     ["path"] = EmulatorPath,
-                    ["index"] = int.TryParse(Index, out var indexParse) ? indexParse : 0,
-                    ["pid"] = GetEmulatorPid(indexParse),
+                    ["index"] = index,
+                    ["pid"] = GetEmulatorPid(index),
                 };
+
                 return JsonConvert.SerializeObject(configObject);
             }
         }
@@ -575,8 +732,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool RetryOnDisconnected
     {
         get => _retryOnDisconnected;
-        set
-        {
+        set {
             if (string.IsNullOrEmpty(SettingsViewModel.StartSettings.EmulatorPath))
             {
                 MessageBoxHelper.Show(
@@ -600,8 +756,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool AllowAdbRestart
     {
         get => _allowAdbRestart;
-        set
-        {
+        set {
             SetAndNotify(ref _allowAdbRestart, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.AllowAdbRestart, value.ToString());
         }
@@ -615,8 +770,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool AllowAdbHardRestart
     {
         get => _allowAdbHardRestart;
-        set
-        {
+        set {
             SetAndNotify(ref _allowAdbHardRestart, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.AllowAdbHardRestart, value.ToString());
         }
@@ -627,8 +781,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool AdbLiteEnabled
     {
         get => _adbLiteEnabled;
-        set
-        {
+        set {
             SetAndNotify(ref _adbLiteEnabled, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.AdbLiteEnabled, value.ToString());
             UpdateInstanceSettings();
@@ -640,8 +793,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public bool KillAdbOnExit
     {
         get => _killAdbOnExit;
-        set
-        {
+        set {
             SetAndNotify(ref _killAdbOnExit, value);
             ConfigurationHelper.SetValue(ConfigurationKeys.KillAdbOnExit, value.ToString());
             UpdateInstanceSettings();
@@ -684,7 +836,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         }
         catch (Exception e)
         {
-            _logger.Information(e.Message);
+            _logger.Warning(e, "Exception caught");
             error = LocalizationHelper.GetString("EmulatorException");
             return false;
         }
@@ -764,9 +916,9 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
 
     /// <summary>
     /// Selects ADB program file.
+    /// UI 绑定的方法
     /// </summary>
-    // UI 绑定的方法
-    // ReSharper disable once UnusedMember.Global
+    [UsedImplicitly]
     public void SelectFile()
     {
         var dialog = new OpenFileDialog();
@@ -781,17 +933,26 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         }
     }
 
+    private static Window? _imagePopupWindow;
+
     /// <summary>
     /// Test Link And Get Image.
+    /// UI 绑定的方法
     /// </summary>
-    // UI 绑定的方法
-    // ReSharper disable once UnusedMember.Global
-    public async void TestLinkAndGetImage()
+    /// <returns>Task</returns>
+    [UsedImplicitly]
+    public async Task TestLinkAndGetImage()
     {
+        if (!_runningState.GetIdle())
+        {
+            return;
+        }
+
         _runningState.SetIdle(false);
 
         var errMsg = string.Empty;
         TestLinkInfo = LocalizationHelper.GetString("ConnectingToEmulator");
+        Instances.AsstProxy.Connected = false;
         var caught = await Task.Run(() => Instances.AsstProxy.AsstConnect(ref errMsg));
         if (!caught)
         {
@@ -800,9 +961,8 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
             return;
         }
 
-        TestLinkImage = await Instances.AsstProxy.AsstGetFreshImageAsync();
-        await Instances.TaskQueueViewModel.Stop();
-        Instances.TaskQueueViewModel.SetStopped();
+        TestLinkImage = await Instances.AsstProxy.AsstGetImageAsync(forceScreencap: true);
+        _runningState.SetIdle(true);
 
         if (TestLinkImage is null)
         {
@@ -820,18 +980,57 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
                 }
 
                 break;
+
+            case "LDPlayer":
+                if (LdPlayerExtras.Enable && ScreencapMethod != "LDExtras")
+                {
+                    TestLinkInfo = $"{LocalizationHelper.GetString("LdExtrasNotEnabledMessage")}\n{ScreencapTestCost}";
+                    return;
+                }
+
+                break;
         }
 
         TestLinkInfo = ScreencapTestCost;
 
-        var popupWindow = new Window
+        if (_imagePopupWindow == null)
         {
-            Width = 800,
-            Height = 481, // (800 - 1 - 1) * 9 / 16 + 32 + 1,
-            Content = new Image { Source = TestLinkImage, },
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-        };
-        popupWindow.ShowDialog();
+            const double TotalWindowWidth = 800;
+
+            var nc = SystemParameters.WindowNonClientFrameThickness;
+            var rb = SystemParameters.WindowResizeBorderThickness;
+
+            double contentWidth = TotalWindowWidth - (nc.Left + nc.Right + rb.Left + rb.Right);
+            double contentHeight = contentWidth * 9.0 / 16.0;
+
+            double totalWindowHeight = contentHeight + (nc.Top + nc.Bottom + rb.Top + rb.Bottom);
+            _imagePopupWindow = new() {
+                Width = TotalWindowWidth,
+                Height = totalWindowHeight,
+                Content = new Image {
+                    Source = TestLinkImage,
+                },
+            };
+            _imagePopupWindow.Loaded += (_, _) => {
+                WindowManager.MoveWindowToRootCenter(_imagePopupWindow);
+            };
+            _imagePopupWindow.Closed += (_, _) => {
+                _imagePopupWindow = null;
+            };
+            var img = (Image)_imagePopupWindow.Content;
+            img.MouseLeftButtonUp += (_, _) => {
+                _ = TestLinkAndGetImage();
+            };
+        }
+        else
+        {
+            if (_imagePopupWindow.Content is Image image)
+            {
+                image.Source = TestLinkImage;
+            }
+        }
+
+        WindowManager.ShowWindow(_imagePopupWindow);
     }
 
     private BitmapImage? _testLinkImage;
@@ -905,8 +1104,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     public string TouchMode
     {
         get => _touchMode;
-        set
-        {
+        set {
             SetAndNotify(ref _touchMode, value);
             UpdateInstanceSettings();
             ConfigurationHelper.SetValue(ConfigurationKeys.TouchMode, value);
@@ -923,22 +1121,26 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
     }
 
     // UI 绑定的方法
-    // ReSharper disable once UnusedMember.Global
-    public async void ReplaceAdb()
+    [UsedImplicitly]
+    public async Task ReplaceAdb()
     {
-        if (string.IsNullOrEmpty(AdbPath))
-        {
-            ToastNotification.ShowDirect(LocalizationHelper.GetString("NoAdbPathSpecifiedMessage"));
-            return;
-        }
-
         if (!File.Exists(MaaUrls.GoogleAdbFilename))
         {
-            var downloadResult = await Instances.HttpService.DownloadFileAsync(new Uri(MaaUrls.GoogleAdbDownloadUrl), MaaUrls.GoogleAdbFilename);
+            string[] downloadUrls =
+            [
+                MaaUrls.GoogleAdbDownloadUrl,
+                MaaUrls.AdbMaaMirrorDownloadUrl,
+                MaaUrls.AdbMaaMirror2DownloadUrl
+            ];
 
-            if (!downloadResult)
+            bool downloadResult = false;
+            foreach (var url in downloadUrls)
             {
-                downloadResult = await Instances.HttpService.DownloadFileAsync(new Uri(MaaUrls.AdbMaaMirrorDownloadUrl), MaaUrls.GoogleAdbFilename);
+                downloadResult = await Instances.HttpService.DownloadFileAsync(new(url), MaaUrls.GoogleAdbFilename);
+                if (downloadResult)
+                {
+                    break;
+                }
             }
 
             if (!downloadResult)
@@ -961,7 +1163,7 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         }
         catch (Exception ex)
         {
-            _logger.Error($"An error occurred while deleting directory: {ex.GetType()}: {ex.Message}");
+            _logger.Error("An error occurred while deleting directory: {Type}: {ExMessage}", ex.GetType(), ex.Message);
             ToastNotification.ShowDirect(LocalizationHelper.GetString("AdbDeletionFailedMessage"));
             return;
         }
@@ -970,54 +1172,23 @@ public class ConnectSettingsUserControlModel : PropertyChangedBase
         {
             ZipFile.ExtractToDirectory(MaaUrls.GoogleAdbFilename, UnzipDir);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            _logger.Error(ex.ToString());
+            _logger.Error(e, "UnzipFailedMessage");
             ToastNotification.ShowDirect(LocalizationHelper.GetString("UnzipFailedMessage"));
             return;
         }
 
-        var replaced = false;
-        if (AdbPath != NewAdb && File.Exists(AdbPath))
+        if (File.Exists(NewAdb))
         {
-            try
-            {
-                foreach (var process in Process.GetProcessesByName(Path.GetFileName(AdbPath)))
-                {
-                    process.Kill();
-                    process.WaitForExit(5000);
-                }
-
-                var adbBack = AdbPath + ".bak";
-                if (!File.Exists(adbBack))
-                {
-                    File.Copy(AdbPath, adbBack, true);
-                }
-
-                File.Copy(NewAdb, AdbPath, true);
-                replaced = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.ToString());
-                replaced = false;
-            }
-        }
-
-        if (replaced)
-        {
+            AdbPath = NewAdb;
             AdbReplaced = true;
-
             ConfigurationHelper.SetValue(ConfigurationKeys.AdbReplaced, bool.TrueString);
-
             ToastNotification.ShowDirect(LocalizationHelper.GetString("SuccessfullyReplacedAdb"));
         }
         else
         {
-            AdbPath = NewAdb;
-
-            using var toast = new ToastNotification(LocalizationHelper.GetString("FailedToReplaceAdbAndUseLocal"));
-            toast.AppendContentText(LocalizationHelper.GetString("FailedToReplaceAdbAndUseLocalDesc")).Show();
+            ToastNotification.ShowDirect(LocalizationHelper.GetString("FailedToReplaceAdbAndUseLocal"));
         }
     }
 

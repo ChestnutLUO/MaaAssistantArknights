@@ -1,6 +1,6 @@
 // <copyright file="Instances.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -10,108 +10,123 @@
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY
 // </copyright>
-#pragma warning disable SA1401, CS8632
 
+#pragma warning disable SA1401
+
+using System;
 using GlobalHotKey;
 using MaaWpfGui.Main;
+using MaaWpfGui.Services;
 using MaaWpfGui.Services.HotKeys;
 using MaaWpfGui.Services.Managers;
 using MaaWpfGui.Services.RemoteControl;
 using MaaWpfGui.Services.Web;
+using MaaWpfGui.ViewModels.Dialogs;
 using MaaWpfGui.ViewModels.UI;
 using MaaWpfGui.ViewModels.UserControl.TaskQueue;
 using Stylet;
 using StyletIoC;
 
-namespace MaaWpfGui.Helper
+namespace MaaWpfGui.Helper;
+
+/// <summary>
+/// The instance manager.
+/// </summary>
+public static class Instances
 {
-    /// <summary>
-    /// The instance manager.
-    /// </summary>
-    public static class Instances
+    public static class Data
     {
-        public static class Data
+        public static int MedicineUsedTimes { get; set; } = 0;
+
+        public static int ExpiringMedicineUsedTimes { get; set; } = 0;
+
+        public static int StoneUsedTimes { get; set; } = 0;
+
+        public static bool HasPrintedScreencapWarning { get; set; } = false;
+
+        public static int RecruitConfirmTime { get; set; } = 0;
+
+        public static void ClearCache()
         {
-            public static FightSettingsUserControlModel.FightTimes? FightTimes { get; set; }
-
-            public static FightSettingsUserControlModel.SanityInfo? SanityReport { get; set; }
-
-            public static int MedicineUsedTimes { get; set; }
-
-            public static int ExpiringMedicineUsedTimes { get; set; }
-
-            public static int StoneUsedTimes { get; set; }
-
-            public static bool HasPrintedScreencapWarning { get; set; }
-
-            public static void ClearCache()
-            {
-                SanityReport = null;
-                MedicineUsedTimes = 0;
-                ExpiringMedicineUsedTimes = 0;
-                StoneUsedTimes = 0;
-                HasPrintedScreencapWarning = false;
-            }
+            FightSettingsUserControlModel.SanityReport = null;
+            MedicineUsedTimes = 0;
+            ExpiringMedicineUsedTimes = 0;
+            StoneUsedTimes = 0;
+            RecruitConfirmTime = 0;
+            HasPrintedScreencapWarning = false;
         }
+    }
 
-        public static IWindowManager WindowManager { get; private set; }
+    public static IWindowManager WindowManager { get; private set; }
 
-        public static TaskQueueViewModel TaskQueueViewModel { get; private set; }
+    public static TaskQueueViewModel TaskQueueViewModel { get; private set; }
 
-        public static RecognizerViewModel RecognizerViewModel { get; private set; }
+    public static ToolboxViewModel ToolboxViewModel { get; private set; }
 
-        public static SettingsViewModel SettingsViewModel { get; private set; }
+    public static SettingsViewModel SettingsViewModel { get; private set; }
 
-        public static CopilotViewModel CopilotViewModel { get; private set; }
+    public static CopilotViewModel CopilotViewModel { get; private set; }
 
-        public static VersionUpdateViewModel VersionUpdateViewModel { get; private set; }
+    public static VersionUpdateDialogViewModel VersionUpdateDialogViewModel { get; private set; }
 
-        public static AnnouncementViewModel AnnouncementViewModel { get; private set; }
+    public static AnnouncementDialogViewModel AnnouncementDialogViewModel { get; private set; }
 
-        public static AsstProxy AsstProxy { get; private set; }
+    public static AsstProxy AsstProxy { get; private set; }
 
-        public static HotKeyManager HotKeyManager { get; private set; }
+    public static StageManager StageManager { get; private set; }
 
-        public static IMaaHotKeyManager MaaHotKeyManager { get; private set; }
+    public static HotKeyManager HotKeyManager { get; private set; }
 
-        public static IMaaHotKeyActionHandler MaaHotKeyActionHandler { get; private set; }
+    public static IMaaHotKeyManager MaaHotKeyManager { get; private set; }
 
-        // 别的地方有用到这个吗？
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public static RemoteControlService RemoteControlService { get; private set; }
+    public static IMaaHotKeyActionHandler MaaHotKeyActionHandler { get; private set; }
 
-        public static IMainWindowManager MainWindowManager { get; private set; }
+    public static OverlayViewModel OverlayViewModel { get; private set; }
 
-        public static IHttpService HttpService { get; private set; }
+    // 别的地方有用到这个吗？
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
+    public static RemoteControlService RemoteControlService { get; private set; }
 
-        public static IMaaApiService MaaApiService { get; private set; }
+    public static IMainWindowManager MainWindowManager { get; private set; }
 
-        public static void Instantiate(IContainer container)
-        {
-            WindowManager = container.Get<WindowManager>();
+    public static event EventHandler MainWindowManagerInstantiated;
 
-            AsstProxy = container.Get<AsstProxy>();
-            TaskQueueViewModel = container.Get<TaskQueueViewModel>();
-            RecognizerViewModel = container.Get<RecognizerViewModel>();
-            SettingsViewModel = container.Get<SettingsViewModel>();
-            CopilotViewModel = container.Get<CopilotViewModel>();
-            VersionUpdateViewModel = container.Get<VersionUpdateViewModel>();
-            AnnouncementViewModel = container.Get<AnnouncementViewModel>();
+    public static IHttpService HttpService { get; private set; }
 
-            // 这两实例化时存在依赖顺序
-            HttpService = container.Get<HttpService>();
-            MaaApiService = container.Get<MaaApiService>();
+    public static IMaaApiService MaaApiService { get; private set; }
 
-            RemoteControlService = container.Get<RemoteControlService>();
+    public static void Instantiate(IContainer container)
+    {
+        WindowManager = container.Get<WindowManager>();
 
-            HotKeyManager = container.Get<HotKeyManager>();
-            MaaHotKeyManager = container.Get<MaaHotKeyManager>();
-            MaaHotKeyActionHandler = container.Get<MaaHotKeyActionHandler>();
-        }
+        // 这两实例化时存在依赖顺序
+        HttpService = container.Get<HttpService>();
+        MaaApiService = container.Get<MaaApiService>();
 
-        public static void InstantiateOnRootViewDisplayed(IContainer container)
-        {
-            MainWindowManager = container.Get<MainWindowManager>();
-        }
+        VersionUpdateDialogViewModel = container.Get<VersionUpdateDialogViewModel>();
+        AnnouncementDialogViewModel = container.Get<AnnouncementDialogViewModel>();
+        AsstProxy = container.Get<AsstProxy>();
+
+        // 这些实例化时存在依赖顺序
+        StageManager = container.Get<StageManager>();
+        TaskQueueViewModel = container.Get<TaskQueueViewModel>();
+        ToolboxViewModel = container.Get<ToolboxViewModel>();
+
+        SettingsViewModel = container.Get<SettingsViewModel>();
+        CopilotViewModel = container.Get<CopilotViewModel>();
+
+        RemoteControlService = container.Get<RemoteControlService>();
+
+        OverlayViewModel = container.Get<OverlayViewModel>();
+
+        HotKeyManager = container.Get<HotKeyManager>();
+        MaaHotKeyManager = container.Get<MaaHotKeyManager>();
+        MaaHotKeyActionHandler = container.Get<MaaHotKeyActionHandler>();
+    }
+
+    public static void InstantiateOnRootViewDisplayed(IContainer container)
+    {
+        MainWindowManager = container.Get<MainWindowManager>();
+        MainWindowManagerInstantiated?.Invoke(null, EventArgs.Empty);
     }
 }

@@ -8,7 +8,6 @@
 
 #include "Assistant.h"
 #include "Common/AsstTypes.h"
-#include "Common/AsstVersion.h"
 #include "Config/ResourceLoader.h"
 #include "Utils/Logger.hpp"
 #include "Utils/WorkingDir.hpp"
@@ -231,6 +230,23 @@ AsstSize AsstGetImage(AsstHandle handle, void* buff, AsstSize buff_size)
     return data_size;
 }
 
+AsstSize AsstGetImageBgr(AsstHandle handle, void* buff, AsstSize buff_size)
+{
+    if (!inited() || handle == nullptr || buff == nullptr) {
+        return NullSize;
+    }
+
+    auto img_data = handle->get_image_bgr();
+    size_t data_size = img_data.size();
+
+    if (buff_size < data_size) {
+        return NullSize;
+    }
+
+    memcpy(buff, img_data.data(), data_size * sizeof(decltype(img_data)::value_type));
+    return data_size;
+}
+
 AsstSize AsstGetUUID(AsstHandle handle, char* buff, AsstSize buff_size)
 {
     if (!inited() || handle == nullptr || buff == nullptr) {
@@ -266,7 +282,7 @@ AsstSize AsstGetNullSize()
 
 const char* AsstGetVersion()
 {
-    return asst::Version;
+    return MAA_VERSION;
 }
 
 void AsstLog(const char* level, const char* message)

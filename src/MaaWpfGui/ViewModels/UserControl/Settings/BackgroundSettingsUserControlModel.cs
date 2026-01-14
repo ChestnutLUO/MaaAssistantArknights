@@ -1,6 +1,6 @@
 // <copyright file="BackgroundSettingsUserControlModel.cs" company="MaaAssistantArknights">
-// MaaWpfGui - A part of the MaaCoreArknights project
-// Copyright (C) 2021 MistEO and Contributors
+// Part of the MaaWpfGui project, maintained by the MaaAssistantArknights team (Maa Team)
+// Copyright (C) 2021-2025 MaaAssistantArknights Contributors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License v3.0 only as published by
@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -42,18 +41,18 @@ public class BackgroundSettingsUserControlModel : PropertyChangedBase
     public string BackgroundImagePath
     {
         get => _backgroundImagePath;
-        set
-        {
+        set {
             SetAndNotify(ref _backgroundImagePath, value);
             ConfigurationHelper.SetGlobalValue(ConfigurationKeys.BackgroundImagePath, value);
             BackgroundImage = RefreshBackgroundImage(value);
+
+            AchievementTrackerHelper.Instance.Unlock(AchievementIds.CustomizationMaster);
         }
     }
 
     public void SelectImagePath()
     {
-        var dialog = new OpenFileDialog
-        {
+        var dialog = new OpenFileDialog {
             Filter = "Image|*.jpg;*.png",
         };
 
@@ -68,8 +67,7 @@ public class BackgroundSettingsUserControlModel : PropertyChangedBase
     public BitmapImage? BackgroundImage
     {
         get => _backgroundImage;
-        set
-        {
+        set {
             SetAndNotify(ref _backgroundImage, value);
         }
     }
@@ -79,8 +77,7 @@ public class BackgroundSettingsUserControlModel : PropertyChangedBase
     public Stretch BackgroundImageStretchMode
     {
         get => _backgroundImageStretchMode;
-        set
-        {
+        set {
             SetAndNotify(ref _backgroundImageStretchMode, value);
             ConfigurationHelper.SetGlobalValue(ConfigurationKeys.BackgroundImageStretchMode, value.ToString());
         }
@@ -125,8 +122,7 @@ public class BackgroundSettingsUserControlModel : PropertyChangedBase
     public int BackgroundOpacity
     {
         get => _backgroundOpacity;
-        set
-        {
+        set {
             SetAndNotify(ref _backgroundOpacity, value);
         }
     }
@@ -136,8 +132,7 @@ public class BackgroundSettingsUserControlModel : PropertyChangedBase
     public int BackgroundBlurEffectRadius
     {
         get => _backgroundBlurEffectRadius;
-        set
-        {
+        set {
             SetAndNotify(ref _backgroundBlurEffectRadius, value);
         }
     }

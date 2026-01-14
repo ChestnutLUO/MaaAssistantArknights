@@ -8,7 +8,11 @@ icon: material-symbols:task
 `resource/tasks` 的使用方法及各欄位說明
 
 ::: tip
-請注意 JSON 檔是不支援註解的，下方的註解僅用於說明，請勿直接複製使用
+推薦使用 [Visual Studio Code](https://code.visualstudio.com/) 並安裝 [Maa Pipeline Support](https://marketplace.visualstudio.com/items?itemName=nekosu.maa-support) 擴展以實現高效編輯，詳情請查閱擴展首頁和[文件](../develop/vsc-ext-tutorial.md)
+:::
+
+::: warning
+JSON 文件是不支持注釋的，文本中的注釋僅用於示範，請勿直接複製使用
 :::
 
 ## 完整欄位一覽
@@ -91,6 +95,9 @@ icon: material-symbols:task
         "specialParams": [ int, ... ],      // 某些特殊辨識器需要的參數
                                             // 額外的，當 action 為 Swipe 時可選，[0] 表示 duration，[1] 表示 是否啟用額外滑動
 
+        "highResolutionSwipeFix": false,    // 可選項，是否啟用高解析度滑動修正，目前應該只有關卡導航未使用 Unity 滑動方式所以需要開啟
+                                            // 預設為 false
+
         /* 以下欄位僅當 algorithm 為 MatchTemplate 時有效 */
 
         "template": "xxx.png",              // 可選項，要匹配的圖片檔案名稱
@@ -104,7 +111,7 @@ icon: material-symbols:task
                                             // 然後設定 "maskRange" 的範圍為 [ 1, 255 ]，匹配的時候立刻忽略塗黑的部分
 
         "colorScales": [                    // 當 method 為 HSVCount 或 RGBCount 時有效且必選，數色掩碼範圍。
-            [                               // list<array<array<int, 3>, 2> | array<int, 2>>
+            [                               // list<array<array<int, 3>, 2>> / list<array<int, 2>>
                 [23, 150, 40],              // 結構為 [[lower1, upper1], [lower2, upper2], ...]
                 [25, 230, 150]              //     內層為 int 時是灰度，
             ],                              //     　　為 array<int, 3> 時是三通道顏色，method 決定其是 RGB 或 HSV；
@@ -114,6 +121,11 @@ icon: material-symbols:task
         "colorWithClose": true,             // 可選項，當 method 為 HSVCount 或 RGBCount 時有效，默認為 true
                                             // 數色時是否先用閉運算處理掩碼範圍。
                                             // 閉運算可以填補小黑點，一般會提高數色匹配效果，但若圖片中包含文字建議設為 false
+
+        "pureColor": false,                 // 可選項，當 method 為 HSVCount 或 RGBCount 時有效，默認為 false
+                                            // 如果為 true，則忽略模板匹配得分，完全依賴顏色匹配結果
+                                            // 適用於顏色特徵明顯但模板匹配效果不佳的場景
+                                            // 使用此選項時建議相應提高 templThreshold 閾值
 
         "method": "Ccoeff",                 // 可選項，模板匹配算法，可以是列表
                                             // 不填寫時默認為 Ccoeff
@@ -140,12 +152,37 @@ icon: material-symbols:task
         "isAscii": false,                   // 可選項，要辨識的文字內容是否為 ASCII 碼字元
                                             // 不填寫預設 false
 
-        "withoutDet": false                 // 可選項，是否不使用檢測模型
+        "withoutDet": false,                // 可選項，是否不使用檢測模型
                                             // 不填寫預設 false
 
-        /* 以下欄位僅當 algorithm 為 Hash 時有效 */
-        // 演算法不成熟，僅部分特例情況中用到了，暫不推薦使用
-        // Todo
+        /* 以下欄位僅當 algorithm 為 OcrDetect 且 withoutDet 為 true 時有效 */
+
+        "useRaw": true,                     // 可選項，是否使用原圖匹配
+                                            // 不填寫預設 true，false 時為灰階匹配
+
+        "binThreshold": [140, 255],         // 可選項，灰階二值化閾值（預設為 [140, 255]）
+                                            // 灰階值不在範圍的像素會被視為背景，排除在文字區域之外
+                                            // 最終僅保留 [lower, upper] 區間的像素作為文字前景
+
+        /* 以下欄位僅當 algorithm 為 JustReturn 且 action 為 Input 時有效 */
+
+        "inputText": "A string text.",      // 必選項，要輸入的文字內容，為字串格式
+
+        /* 以下欄位僅當 algorithm 為 FeatureMatch 時有效 */
+
+        "template": "xxx.png",              // 可選項，要符合的圖片檔案名，可以是字串或字串列表
+                                            // 預設 "任務名稱.png"
+
+        "count": 4,                         // 匹配的特徵點的數量要求 (閾值), 預設值 = 4
+
+        "ratio": 0.6,                       // KNN 匹配演算法的距離比值, [0 - 1.0], 越大則匹配越寬鬆, 更容易連線. 預設0.6
+
+        "detector": "SIFT",                 // 特徵點偵測器類型, 可選值為 SIFT, ORB, BRISK, KAZE, AKAZE, SURF; 預設值 = SIFT
+                                            // SIFT: 計算複雜度高，具有尺度不變性、旋轉不變性。效果最好。
+                                            // ORB: 計算速度非常快，具有旋轉不變性。但不具有尺度不變性。
+                                            // BRISK: 計算速度非常快，具有尺度不變性、旋轉不變性。
+                                            // KAZE: 適用於2D和3D影像，具有尺度不變性、旋轉不變性。
+                                            // AKAZE: 計算速度較快，具有尺度不變性、旋轉不變性。
     }
 }
 ```
@@ -160,23 +197,23 @@ Template task 與 base task 合稱**範本任務**。
 
 - 如果 `tasks.json` 中未顯式定義任務 "B@A"，則在 `sub`, `next`, `onErrorNext`, `exceededNext`, `reduceOtherTimes` 欄位中增加 `B@` 首碼（如遇任務名開頭為 `#` 則增加 `B` 首碼），其餘參數與 "A" 任務相同。就是說如果任務 "A" 有以下參數：
 
-    ```json
-    "A": {
-        "template": "A.png",
-        ...,
-        "next": [ "N1", "N2" ]
-    }
-    ```
+  ```json
+  "A": {
+      "template": "A.png",
+      ...,
+      "next": [ "N1", "N2" ]
+  }
+  ```
 
-    就相當於同時定義了
+  就相當於同時定義了
 
-    ```json
-    "B@A": {
-        "template": "A.png",
-        ...,
-        "next": [ "B@N1", "B@N2" ]
-    }
-    ```
+  ```json
+  "B@A": {
+      "template": "A.png",
+      ...,
+      "next": [ "B@N1", "B@N2" ]
+  }
+  ```
 
 - 如果 `tasks.json` 中定義了任務 "B@A"，則：
   1. 如果 "B@A" 與 "A" 的 `algorithm` 欄位不同，則派生類參數不繼承（只繼承 `TaskInfo` 定義的參數）
@@ -206,11 +243,11 @@ Virtual task 也稱 sharp task（`#` 型任務）。
 
 任務名帶 `#` 的任務即為 virtual task。 `#` 後可接 `next`, `back`, `self`, `sub`, `on_error_next`, `exceeded_next`, `reduce_other_times`。
 
-| 虛任務類型 | 含義 | 簡單範例 |
-|:---------:|:---:|:--------:|
-| self | 父任務名 | `"A": {"next": "#self"}` 中的 `"#self"` 被解釋為 `"A"`<br>`"B": {"next": "A@B@C#self"}` 中的 `"A@B@C#self"` 被解釋為 `"B"`。<sup>1</sup> |
-| back | # 前面的任務名 | `"A@B#back"` 被解釋為 `"A@B"`<br>`"#back"` 直接出現則會被跳過 |
-| next, sub 等 | # 前任務名對應欄位 | 以 `next` 為例：<br>`"A#next"` 被解釋為 `Task.get("A")->next`<br>`"#next"` 直接出現則會被跳過 |
+|  虛任務類型  |        含義        |                                                                 簡單範例                                                                 |
+| :----------: | :----------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
+|     self     |      父任務名      | `"A": {"next": "#self"}` 中的 `"#self"` 被解釋為 `"A"`<br>`"B": {"next": "A@B@C#self"}` 中的 `"A@B@C#self"` 被解釋為 `"B"`。<sup>1</sup> |
+|     back     |   # 前面的任務名   |                                      `"A@B#back"` 被解釋為 `"A@B"`<br>`"#back"` 直接出現則會被跳過                                       |
+| next, sub 等 | # 前任務名對應欄位 |                      以 `next` 為例：<br>`"A#next"` 被解釋為 `Task.get("A")->next`<br>`"#next"` 直接出現則會被跳過                       |
 
 _Note<sup>1</sup>: `"XXX#self"` 與 `"#self"` 含義相同。_
 
@@ -280,7 +317,7 @@ Task.get_raw("B@Loading")->next = { "B#self", "B#next", "B#back" };
          "next": [ "zzz" ]
      }
 }
-   ```
+```
 
 以下程式碼可以實現根據 mode 的值改變任務 "A"，同時會改變其它依賴任務 "A" 的任務，如 "B@A":
 
@@ -300,14 +337,14 @@ default:
 
 ## 運算式計算
 
-| 符號 | 含義 | 實例 |
-|:---------:|:---:|:--------:|
-| `@` | 範本任務 | `Fight@ReturnTo` |
-| `#`（單目） | 虛任務 | `#self` |
-| `#`（雙目） | 虛任務 | `StartUpThemes#next` |
-| `*` | 重複多個任務 | `(ClickCornerAfterPRTS+ClickCorner)*5` |
-| `+` | 任務清單合併（在 next 系列屬性中同名任務只保留最靠前者） | `A+B` |
-| `^` | 任務列表差（在前者但不在後者，順序不變）| `(A+A+B+C)^(A+B+D)`（結果為 `C`） |
+|    符號     |                           含義                           |                  實例                   |
+| :---------: | :------------------------------------------------------: | :-------------------------------------: |
+|     `@`     |                         範本任務                         |            `Fight@ReturnTo`             |
+| `#`（單目） |                          虛任務                          |                 `#self`                 |
+| `#`（雙目） |                          虛任務                          |          `StartUpThemes#next`           |
+|     `*`     |                       重複多個任務                       | `(ClickCornerAfterPRTS+ClickCorner)*10` |
+|     `+`     | 任務清單合併（在 next 系列屬性中同名任務只保留最靠前者） |                  `A+B`                  |
+|     `^`     |         任務列表差（在前者但不在後者，順序不變）         |    `(A+A+B+C)^(A+B+D)`（結果為 `C`）    |
 
 運算子 `@`, `#`, `*`, `+`, `^` 有優先順序：`#`（單目）> `@` = `#`（雙目）> `*` > `+` = `^`。
 
